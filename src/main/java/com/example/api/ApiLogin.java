@@ -1,11 +1,14 @@
 package com.example.api;
 
+import com.example.Entity.CustomUserDetails;
 import com.example.config.JwtProvider;
 import com.example.constant.RoleConstant;
 import com.example.exception.CustomException;
 import com.example.request.LoginRequest;
 import com.example.response.AuthResponse;
 import com.example.response.Response;
+import com.example.response.ResponseData;
+import com.example.response.UserResponse;
 import com.example.util.UserUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,12 +44,28 @@ public class ApiLogin {
 
         ResponseCookie token = jwtProvider.generateTokenCookie(authentication);
 
-        AuthResponse authResponse = new AuthResponse();
-        authResponse.setToken(token.getValue());
-        authResponse.setMessage("Login success !!!");
-        authResponse.setSuccess(true);
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+
+        UserResponse userInformation = new UserResponse();
+        userInformation.setId(userDetails.getUser().getId());
+        userInformation.setAddress(userDetails.getUser().getAddress());
+        userInformation.setDistrict(userDetails.getUser().getDistrict());
+        userInformation.setProvince(userDetails.getUser().getProvince());
+        userInformation.setWard(userDetails.getUser().getWard());
+        userInformation.setEmail(userDetails.getUser().getEmail());
+        userInformation.setFirstName(userDetails.getUser().getFirstName());
+        userInformation.setLastName(userDetails.getUser().getLastName());
+        userInformation.setGender(userDetails.getUser().getGender());
+        userInformation.setMobile(userDetails.getUser().getMobile());
+        userInformation.setCreateAt(userDetails.getUser().getCreatedAt());
+
+        ResponseData<UserResponse> response = new ResponseData<>();
+        response.setSuccess(true);
+        response.setMessage("Login success !!!");
+        response.setResults(userInformation);
+
         return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, token.toString())
-                .body(authResponse);
+                .body(response);
     }
 
     @PostMapping("/account/admin/login")

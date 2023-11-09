@@ -21,11 +21,7 @@ public class CustomUserServiceImpl implements UserDetailsService {
         User user = userRepository.findByEmail(email);
 
         if(user == null){
-            try {
-                throw new CustomException("Invalid username !!!");
-            } catch (CustomException e) {
-                throw new RuntimeException(e);
-            }
+            throw new UsernameNotFoundException(email);
         }
 
         CustomUserDetails userDetails = new CustomUserDetails();

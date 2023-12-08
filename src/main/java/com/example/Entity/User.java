@@ -20,6 +20,7 @@ public class User extends BaseEntity {
     private String email;
 
     @Column(name = "password")
+//    @JsonIgnore
     private String password;
 
     @Column(name = "gender")
@@ -39,6 +40,9 @@ public class User extends BaseEntity {
 
     @Column(name = "ward")
     private String ward;
+
+    @Column(name = "avatar_base64", columnDefinition = "LONGTEXT")
+    private String avatarBase64;
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "user_role",
@@ -149,11 +153,19 @@ public class User extends BaseEntity {
         this.roles = roles;
     }
 
+    public String getAvatarBase64() {
+        return avatarBase64;
+    }
+
+    public void setAvatarBase64(String avatarBase64) {
+        this.avatarBase64 = avatarBase64;
+    }
+
     public User() {
     }
 
-    public User(String firstName, String lastName, String email, String password, String gender,
-                String mobile, String address, String province, String district, String ward, Set<Role> roles, Set<Comment> comments) {
+    public User(String firstName, String lastName, String email, String password, String gender, String mobile,
+                String address, String province, String district, String ward, String avatarBase64, Set<Role> roles, Set<Comment> comments) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
@@ -164,6 +176,7 @@ public class User extends BaseEntity {
         this.province = province;
         this.district = district;
         this.ward = ward;
+        this.avatarBase64 = avatarBase64;
         this.roles = roles;
         this.comments = comments;
     }

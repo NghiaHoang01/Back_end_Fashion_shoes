@@ -1,7 +1,5 @@
 package com.example.request;
 
-import com.example.Entity.Role;
-
 import java.util.Set;
 
 public class UserRequest {
@@ -15,13 +13,13 @@ public class UserRequest {
     private String province;
     private String district;
     private String ward;
-    private Set<String> lstRole;
+    private String avatarBase64;
 
     public UserRequest() {
     }
 
-    public UserRequest(String firstName, String lastName, String email, String password,
-                       String gender, String mobile, String address, String province, String district, String ward, Set<String> lstRole) {
+    public UserRequest(String firstName, String lastName, String email, String password, String gender, String mobile,
+                       String address, String province, String district, String ward, String avatarBase64) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
@@ -32,7 +30,7 @@ public class UserRequest {
         this.province = province;
         this.district = district;
         this.ward = ward;
-        this.lstRole = lstRole;
+        this.avatarBase64 = avatarBase64;
     }
 
     public String getEmail() {
@@ -115,11 +113,11 @@ public class UserRequest {
         this.ward = ward;
     }
 
-    public Set<String> getLstRole() {
-        return lstRole;
+    public String getAvatarBase64() {
+        return avatarBase64;
     }
 
-    public void setLstRole(Set<String> lstRole) {
-        this.lstRole = lstRole;
+    public void setAvatarBase64(String avatarBase64) {
+        this.avatarBase64 = avatarBase64;
     }
 }

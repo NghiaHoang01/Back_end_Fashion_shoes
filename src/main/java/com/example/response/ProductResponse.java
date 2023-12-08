@@ -2,26 +2,33 @@ package com.example.response;
 
 import com.example.Entity.Product;
 
-public class ProductResponse extends Response{
-    private Product product;
+import java.util.List;
+
+public class ProductResponse {
+    private List<Product> listProducts;
+    private Long totalProduct;
+
+    public ProductResponse(List<Product> listProducts, Long totalProduct) {
+        this.listProducts = listProducts;
+        this.totalProduct = totalProduct;
+    }
 
     public ProductResponse() {
     }
 
-    public ProductResponse(Product product) {
-        this.product = product;
+    public List<Product> getListProducts() {
+        return listProducts;
     }
 
-    public ProductResponse(String message, Boolean success, Product product) {
-        super(message, success);
-        this.product = product;
+    public void setListProducts(List<Product> listProducts) {
+        this.listProducts = listProducts;
     }
 
-    public Product getProduct() {
-        return product;
+    public Long getTotalProduct() {
+        return totalProduct;
     }
 
-    public void setProduct(Product product) {
-        this.product = product;
+    public void setTotalProduct(Long totalProduct) {
+        this.totalProduct = totalProduct;
     }
 }

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -24,12 +25,8 @@ public class Product extends BaseEntity {
     @Column(name = "price")
     private double price;
 
-//    @Column(name = "image_url")
-//    private String imageUrl;
-
-    @ElementCollection
-    @Column(name = "main_image")
-    private Set<ImageProduct> mainImage;
+    @Column(name = "main_image", columnDefinition = "LONGTEXT")
+    private String mainImageBase64;
 
     @Column(name = "discounted_percent")
     private int discountedPercent;
@@ -44,36 +41,43 @@ public class Product extends BaseEntity {
     @OneToMany(mappedBy = "productOfComment")
     private Set<Comment> comments = new HashSet<>();
 
-    //@JsonIgnore
+//    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "brand_id")
     private Brand brandProduct;
 
-    //@JsonIgnore
+//    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "parentCategory_id")
     private ParentCategory parentCategoryOfProduct;
 
-    //@JsonIgnore
+//    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "childCategory_id")
     private ChildCategory childCategoryOfProduct;
 
     @ElementCollection
-    // dùng trong quan hệ One To Many, dùng khi bảng many chỉ có ý nghĩa khi gán với bảng phía one (hoặc không làm khóa ngoại của bảng khác)
-    private Set<ImageProduct> imageProducts;
+    @Column(name = "image_secondary", columnDefinition = "LONGTEXT")
+    private List<String> imageSecondaries;
 
     @ElementCollection
     private Set<Size> sizes = new HashSet<>();
 
     //getter-setter
-
-    public Set<ImageProduct> getImageProducts() {
-        return imageProducts;
+    public String getMainImageBase64() {
+        return mainImageBase64;
     }
 
-    public void setImageProducts(Set<ImageProduct> imageProducts) {
-        this.imageProducts = imageProducts;
+    public void setMainImageBase64(String mainImageBase64) {
+        this.mainImageBase64 = mainImageBase64;
+    }
+
+    public List<String> getImageSecondaries() {
+        return imageSecondaries;
+    }
+
+    public void setImageSecondaries(List<String> imageSecondaries) {
+        this.imageSecondaries = imageSecondaries;
     }
 
     public String getName() {
@@ -180,25 +184,17 @@ public class Product extends BaseEntity {
         this.sizes = sizes;
     }
 
-    public Set<ImageProduct> getMainImage() {
-        return mainImage;
-    }
-
-    public void setMainImage(Set<ImageProduct> mainImage) {
-        this.mainImage = mainImage;
-    }
-
     public Product() {
     }
 
-    public Product(String name, String description, String title, int quantity, double price, Set<ImageProduct> mainImage, int discountedPercent, double discountedPrice, String color, Set<Comment> comments, Brand brandProduct,
-                   ParentCategory parentCategoryOfProduct, ChildCategory childCategoryOfProduct, Set<ImageProduct> imageProducts, Set<Size> sizes) {
+    public Product(String name, String description, String title, int quantity, double price, String mainImageBase64, int discountedPercent, double discountedPrice, String color, Set<Comment> comments, Brand brandProduct,
+                   ParentCategory parentCategoryOfProduct, ChildCategory childCategoryOfProduct, List<String> imageSecondaries, Set<Size> sizes) {
         this.name = name;
         this.description = description;
         this.title = title;
         this.quantity = quantity;
         this.price = price;
-        this.mainImage = mainImage;
+        this.mainImageBase64 = mainImageBase64;
         this.discountedPercent = discountedPercent;
         this.discountedPrice = discountedPrice;
         this.color = color;
@@ -206,7 +202,7 @@ public class Product extends BaseEntity {
         this.brandProduct = brandProduct;
         this.parentCategoryOfProduct = parentCategoryOfProduct;
         this.childCategoryOfProduct = childCategoryOfProduct;
-        this.imageProducts = imageProducts;
+        this.imageSecondaries = imageSecondaries;
         this.sizes = sizes;
     }
 }

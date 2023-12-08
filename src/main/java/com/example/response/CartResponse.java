@@ -2,26 +2,34 @@ package com.example.response;
 
 import com.example.Entity.Cart;
 
-public class CartResponse extends Response{
-    private Cart cart;
+import java.util.List;
+
+public class CartResponse{
+    private List<CartItemResponse> listCartItems;
+
+    private Long totalItems;
 
     public CartResponse() {
     }
 
-    public CartResponse(Cart cart) {
-        this.cart = cart;
+    public CartResponse(List<CartItemResponse> listCartItems, Long totalItems) {
+        this.listCartItems = listCartItems;
+        this.totalItems = totalItems;
     }
 
-    public CartResponse(String message, Boolean success, Cart cart) {
-        super(message, success);
-        this.cart = cart;
+    public List<CartItemResponse> getListCartItems() {
+        return listCartItems;
     }
 
-    public Cart getCart() {
-        return cart;
+    public void setListCartItems(List<CartItemResponse> listCartItems) {
+        this.listCartItems = listCartItems;
     }
 
-    public void setCart(Cart cart) {
-        this.cart = cart;
+    public Long getTotalItems() {
+        return totalItems;
+    }
+
+    public void setTotalItems(Long totalItems) {
+        this.totalItems = totalItems;
     }
 }

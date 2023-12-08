@@ -14,5 +14,4 @@ public interface CartRepository extends JpaRepository<Cart,Long> {
 
     List<Cart> findByUserIdOrderByIdDesc(Long userId);
 
-    void deleteByCreatedAtGreaterThan(LocalDateTime date);
 }

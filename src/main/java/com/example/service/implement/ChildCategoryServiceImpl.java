@@ -58,7 +58,7 @@ public class ChildCategoryServiceImpl implements ChildCategoryService {
                     ChildCategory childCategory = new ChildCategory();
                     childCategory.setName(childCategoryRequest.getName());
                     childCategory.setParentCategory(parentCategory);
-                    childCategory.setCreatedBy(admin.getId());
+                    childCategory.setCreatedBy(admin.getEmail());
 
                     return childCategoryRepository.save(childCategory);
                 }else{
@@ -87,7 +87,7 @@ public class ChildCategoryServiceImpl implements ChildCategoryService {
                 User admin = userService.findUserProfileByJwt(token);
 
                 oldChildCategory.get().setName(childCategoryRequest.getName());
-                oldChildCategory.get().setUpdateBy(admin.getId());
+                oldChildCategory.get().setUpdateBy(admin.getEmail());
 
                 return childCategoryRepository.save(oldChildCategory.get());
             }else{
@@ -117,7 +117,7 @@ public class ChildCategoryServiceImpl implements ChildCategoryService {
     }
 
     @Override
-    public List<ChildCategory> getAllChildCategoryByParentCategoryNameAndBrandName(String parentCategoryName, String brandName) throws CustomException {
-        return childCategoryRepository.getAllChildCategoryByParentCategoryNameAndBrandName(parentCategoryName,brandName);
+    public List<ChildCategory> getAllChildCategoryByParentCategoryId(Long parentCategoryId) throws CustomException {
+        return childCategoryRepository.getAllChildCategoryByParentCategoryId(parentCategoryId);
     }
 }

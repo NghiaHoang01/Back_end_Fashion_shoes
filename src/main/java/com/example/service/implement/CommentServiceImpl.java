@@ -1,7 +1,6 @@
 package com.example.service.implement;
 
 import com.example.Entity.Comment;
-import com.example.Entity.ImageProduct;
 import com.example.Entity.Product;
 import com.example.Entity.User;
 import com.example.config.JwtProvider;
@@ -10,7 +9,6 @@ import com.example.repository.CommentRepository;
 import com.example.repository.ProductRepository;
 import com.example.request.CommentRequest;
 import com.example.service.CommentService;
-import com.example.util.UploadImageUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -22,7 +20,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 @Service
 public class CommentServiceImpl implements CommentService {
@@ -36,9 +33,6 @@ public class CommentServiceImpl implements CommentService {
     private UserServiceImpl userService;
     @Autowired
     private ProductRepository productRepository;
-    @Autowired
-    private UploadImageUtil uploadImageUtil;
-
 
     @Override
     @Transactional
@@ -49,14 +43,12 @@ public class CommentServiceImpl implements CommentService {
             String token = jwtProvider.getTokenFromCookie(request);
             User user = userService.findUserProfileByJwt(token);
 
-            Set<ImageProduct> imageComments = uploadImageUtil.uploadImageOfProduct(multipartFiles);
-
             Comment comment = new Comment();
             comment.setComment(commentRequest.getComment());
             comment.setProductOfComment(product.get());
             comment.setUserOfComment(user);
-            comment.setImageComments(imageComments);
-            comment.setCreatedBy(user.getId());
+//            comment.setImageComments(imageComments);
+            comment.setCreatedBy(user.getEmail());
 
             return commentRepository.save(comment);
         }else{
@@ -74,11 +66,10 @@ public class CommentServiceImpl implements CommentService {
             User user = userService.findUserProfileByJwt(token);
 
             if(oldComment.get().getUserOfComment().getId().equals(user.getId())){
-                Set<ImageProduct> imageComments = uploadImageUtil.uploadImageOfProduct(multipartFiles);
 
                 oldComment.get().setComment(commentRequest.getComment());
-                oldComment.get().setUpdateBy(user.getId());
-                oldComment.get().setImageComments(imageComments);
+                oldComment.get().setUpdateBy(user.getEmail());
+//                oldComment.get().setImageComments(imageComments);
 
                 return commentRepository.save(oldComment.get());
             }else{

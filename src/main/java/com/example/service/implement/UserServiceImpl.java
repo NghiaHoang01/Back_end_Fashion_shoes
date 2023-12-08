@@ -6,10 +6,15 @@ import com.example.config.JwtProvider;
 import com.example.constant.RoleConstant;
 import com.example.exception.CustomException;
 import com.example.repository.UserRepository;
+import com.example.request.OtpRequest;
 import com.example.request.PasswordRequest;
+import com.example.request.ResetPasswordRequest;
 import com.example.request.UserRequest;
 import com.example.response.Response;
 import com.example.service.UserService;
+import com.example.util.EmailUtil;
+import com.example.util.OTPUtil;
+import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -18,6 +23,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
@@ -33,6 +39,10 @@ public class UserServiceImpl implements UserService {
     private PasswordEncoder passwordEncoder;
     @Autowired
     private HttpServletRequest request;
+    @Autowired
+    private OTPUtil otpUtil;
+    @Autowired
+    private EmailUtil emailUtil;
 
     @Override
     public User findUserById(Long id) throws CustomException {
@@ -52,66 +62,81 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User findUserByEmail(String email) throws CustomException {
-        return userRepository.findByEmail(email);
+        User user = userRepository.findByEmail(email);
+        if (user != null) {
+            return user;
+        }
+        throw new CustomException("User not found with email: " + email);
     }
 
     @Override
     @Transactional
-    public User registerUser(UserRequest userRequest) throws CustomException {
-        User user = new User();
+    public void registerUser(UserRequest userRequest) throws CustomException {
+        User checkExist = userRepository.findByEmail(userRequest.getEmail());
 
-        Role role = roleService.findByName(RoleConstant.USER);
+        if (checkExist != null) {
+            throw new CustomException("Email is already exist !!!");
+        } else {
+            User user = new User();
 
-        user.getRoles().add(role);
-        user.setPassword(passwordEncoder.encode(userRequest.getPassword()));
-        user.setFirstName(userRequest.getFirstName());
-        user.setLastName(userRequest.getLastName());
-        user.setEmail(userRequest.getEmail());
-        user.setMobile(userRequest.getMobile());
-        user.setGender(userRequest.getGender().toUpperCase());
-        user.setAddress(userRequest.getAddress());
-        user.setProvince(userRequest.getProvince());
-        user.setDistrict(userRequest.getDistrict());
-        user.setWard(userRequest.getWard());
+            Role role = roleService.findByName(RoleConstant.USER);
 
-        return userRepository.save(user);
+            user.getRoles().add(role);
+            user.setPassword(passwordEncoder.encode(userRequest.getPassword()));
+            user.setFirstName(userRequest.getFirstName());
+            user.setLastName(userRequest.getLastName());
+            user.setEmail(userRequest.getEmail());
+            user.setMobile(userRequest.getMobile());
+            user.setGender(userRequest.getGender().toUpperCase());
+            user.setAddress(userRequest.getAddress());
+            user.setProvince(userRequest.getProvince());
+            user.setDistrict(userRequest.getDistrict());
+            user.setWard(userRequest.getWard());
+            user.setAvatarBase64(userRequest.getAvatarBase64());
+            user.setCreatedBy(userRequest.getEmail());
+            userRepository.save(user);
+        }
     }
 
     @Override
-    public User registerAdmin(UserRequest adminRequest) throws CustomException {
-        User admin = new User();
+    @Transactional
+    public void registerAdmin(UserRequest adminRequest) throws CustomException {
+        User checkExist = userRepository.findByEmail(adminRequest.getEmail());
 
-        String token = jwtProvider.getTokenFromCookie(request);
+        if (checkExist != null) {
+            throw new CustomException("Admin whose email: " + adminRequest.getEmail() + " already exists !!!");
+        } else {
+            User admin = new User();
 
-        String email = (String) jwtProvider.getClaimsFormToken(token).get("email");
-        Long createdBy = findUserByEmail(email).getId();
+            String token = jwtProvider.getTokenFromCookie(request);
 
-        admin.setCreatedBy(createdBy);
-        admin.setPassword(passwordEncoder.encode(adminRequest.getPassword()));
-        admin.setFirstName(adminRequest.getFirstName());
-        admin.setLastName(adminRequest.getLastName());
-        admin.setGender(adminRequest.getGender().toUpperCase());
-        admin.setMobile(adminRequest.getMobile());
-        admin.setEmail(adminRequest.getEmail());
-        admin.setAddress(adminRequest.getAddress());
-        admin.setProvince(adminRequest.getProvince());
-        admin.setDistrict(adminRequest.getDistrict());
-        admin.setWard(adminRequest.getWard());
-        adminRequest.getLstRole().forEach(r -> {
-            try {
-                Role role = roleService.findByName(r.toUpperCase());
-                admin.getRoles().add(role);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-        });
+            String email = (String) jwtProvider.getClaimsFormToken(token).get("email");
+            String createdBy = findUserByEmail(email).getEmail();
 
-        return userRepository.save(admin);
+            Role userRole = roleService.findByName(RoleConstant.USER);
+            Role adminRole = roleService.findByName(RoleConstant.ADMIN);
+
+            admin.getRoles().add(userRole);
+            admin.getRoles().add(adminRole);
+            admin.setCreatedBy(createdBy);
+            admin.setPassword(passwordEncoder.encode(adminRequest.getPassword()));
+            admin.setFirstName(adminRequest.getFirstName());
+            admin.setLastName(adminRequest.getLastName());
+            admin.setGender(adminRequest.getGender().toUpperCase());
+            admin.setMobile(adminRequest.getMobile());
+            admin.setEmail(adminRequest.getEmail());
+            admin.setAddress(adminRequest.getAddress());
+            admin.setProvince(adminRequest.getProvince());
+            admin.setDistrict(adminRequest.getDistrict());
+            admin.setWard(adminRequest.getWard());
+
+            userRepository.save(admin);
+        }
     }
 
     @Override
     public List<User> getAllUser(int pageIndex, int pageSize) {
-        Pageable pageable = PageRequest.of(pageIndex-1, pageSize);
+        Pageable pageable = PageRequest.of(pageIndex - 1, pageSize);
         return userRepository.findAll(pageable).getContent();
     }
 
@@ -127,16 +152,18 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User updateInformation(UserRequest userRequest) throws CustomException {
+    @Transactional
+    public User updateInformation(UserRequest userRequest) throws CustomException, IOException {
         String token = jwtProvider.getTokenFromCookie(request);
 
         User oldUser = findUserProfileByJwt(token);
 
+        oldUser.setAvatarBase64(userRequest.getAvatarBase64());
         oldUser.setFirstName(userRequest.getFirstName());
         oldUser.setLastName(userRequest.getLastName());
         oldUser.setGender(userRequest.getGender().toUpperCase());
         oldUser.setMobile(userRequest.getMobile());
-        oldUser.setUpdateBy(oldUser.getId());
+        oldUser.setUpdateBy(oldUser.getEmail());
         oldUser.setAddress(userRequest.getAddress());
         oldUser.setProvince(userRequest.getProvince());
         oldUser.setDistrict(userRequest.getDistrict());
@@ -151,10 +178,11 @@ public class UserServiceImpl implements UserService {
 
         User user = findUserProfileByJwt(token);
 
-        return passwordEncoder.matches(password.getPassword(), user.getPassword());
+        return passwordEncoder.matches(password.getOldPassword(), user.getPassword());
     }
 
     @Override
+    @Transactional
     public Response changePassword(PasswordRequest passwordRequest) throws CustomException {
         String token = jwtProvider.getTokenFromCookie(request);
 
@@ -162,16 +190,64 @@ public class UserServiceImpl implements UserService {
 
         Response response = new Response();
 
-        if(passwordRequest.getPassword().equals(passwordRequest.getRepeatPassword())){
-            user.setPassword(passwordEncoder.encode(passwordRequest.getPassword()));
+        if (passwordEncoder.matches(passwordRequest.getOldPassword(), user.getPassword())) {
+            user.setPassword(passwordEncoder.encode(passwordRequest.getNewPassword()));
+            user.setCreatedBy(user.getEmail());
+
             user = userRepository.save(user);
 
             response.setMessage("Change password success !!!");
             response.setSuccess(true);
-        }else{
-            response.setMessage("Password repeat does not match !!!");
-            response.setSuccess(false);
+            return response;
+        } else {
+            throw new CustomException("Old password does not match !!!");
         }
-        return response;
+    }
+
+    @Override
+    public String sendOTPCode(String email) throws CustomException, MessagingException {
+        User checkUser = findUserByEmail(email);
+        if (checkUser != null) {
+            return String.valueOf(otpUtil.generateOTP());
+        }
+        throw new CustomException("User not found with email: " + email);
+    }
+
+    @Override
+    public Response validateOtp(OtpRequest otpRequest) throws CustomException {
+        String otpCookie = otpUtil.getOtpFromCookie(request);
+
+        if(otpCookie != null){
+            if (otpCookie.equals(otpRequest.getOtp())) {
+                Response response = new Response();
+                response.setSuccess(true);
+                response.setMessage("Validate OTP success !!!");
+
+                return response;
+            }
+            throw new CustomException("The OTP code incorrectly !!!");
+        }
+        throw new CustomException("OTP on cookie is empty !!!");
+    }
+
+    @Override
+    public Response resetPassword(ResetPasswordRequest resetPasswordRequest) throws CustomException {
+        String emailCookie = emailUtil.getEmailCookie(request);
+
+        if (emailCookie != null) {
+
+            User user = findUserByEmail(emailCookie);
+
+            user.setPassword(passwordEncoder.encode(resetPasswordRequest.getPassword()));
+            user = userRepository.save(user);
+
+            Response response = new Response();
+            response.setMessage("Reset password success !!!");
+            response.setSuccess(true);
+
+            return response;
+        } else {
+            throw new CustomException("Email on cookie is empty !!!");
+        }
     }
 }

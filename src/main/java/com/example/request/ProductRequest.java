@@ -2,34 +2,41 @@ package com.example.request;
 
 import com.example.Entity.Size;
 
+import java.util.List;
 import java.util.Set;
 
 public class ProductRequest {
     private String name;
     private String title;
     private String description;
-    private String brand;
-    private String parentCategory;
-    private String childCategory;
+    private Long brandId;
+    private Long parentCategoryId;
+    private Long childCategoryId;
     private int discountedPercent;
     private double price;
-    private String colors;
+    private String color;
     private Set<Size> sizes;
+
+    private String mainImageBase64;
+
+    private List<String> imageSecondaries;
 
     public ProductRequest() {
     }
 
-    public ProductRequest(String name, String title, String description, String brand, String parentCategory, String childCategory, int discountedPercent, double price, String colors, Set<Size> sizes) {
+    public ProductRequest(String name, String title, String description, Long brandId, Long parentCategoryId, Long childCategoryId, int discountedPercent, double price, String color, Set<Size> sizes, String mainImageBase64, List<String> imageSecondaries) {
         this.name = name;
         this.title = title;
         this.description = description;
-        this.brand = brand;
-        this.parentCategory = parentCategory;
-        this.childCategory = childCategory;
+        this.brandId = brandId;
+        this.parentCategoryId = parentCategoryId;
+        this.childCategoryId = childCategoryId;
         this.discountedPercent = discountedPercent;
         this.price = price;
-        this.colors = colors;
+        this.color = color;
         this.sizes = sizes;
+        this.mainImageBase64 = mainImageBase64;
+        this.imageSecondaries = imageSecondaries;
     }
 
     public String getDescription() {
@@ -56,28 +63,28 @@ public class ProductRequest {
         this.title = title;
     }
 
-    public String getBrand() {
-        return brand;
+    public Long getBrandId() {
+        return brandId;
     }
 
-    public void setBrand(String brand) {
-        this.brand = brand;
+    public void setBrandId(Long brandId) {
+        this.brandId = brandId;
     }
 
-    public String getParentCategory() {
-        return parentCategory;
+    public Long getParentCategoryId() {
+        return parentCategoryId;
     }
 
-    public void setParentCategory(String parentCategory) {
-        this.parentCategory = parentCategory;
+    public void setParentCategoryId(Long parentCategoryId) {
+        this.parentCategoryId = parentCategoryId;
     }
 
-    public String getChildCategory() {
-        return childCategory;
+    public Long getChildCategoryId() {
+        return childCategoryId;
     }
 
-    public void setChildCategory(String childCategory) {
-        this.childCategory = childCategory;
+    public void setChildCategoryId(Long childCategoryId) {
+        this.childCategoryId = childCategoryId;
     }
 
     public int getDiscountedPercent() {
@@ -96,12 +103,12 @@ public class ProductRequest {
         this.price = price;
     }
 
-    public String getColors() {
-        return colors;
+    public String getColor() {
+        return color;
     }
 
-    public void setColors(String colors) {
-        this.colors = colors;
+    public void setColor(String color) {
+        this.color = color;
     }
 
     public Set<Size> getSizes() {
@@ -110,5 +117,21 @@ public class ProductRequest {
 
     public void setSizes(Set<Size> sizes) {
         this.sizes = sizes;
+    }
+
+    public String getMainImageBase64() {
+        return mainImageBase64;
+    }
+
+    public void setMainImageBase64(String mainImageBase64) {
+        this.mainImageBase64 = mainImageBase64;
+    }
+
+    public List<String> getImageSecondaries() {
+        return imageSecondaries;
+    }
+
+    public void setImageSecondaries(List<String> imageSecondaries) {
+        this.imageSecondaries = imageSecondaries;
     }
 }

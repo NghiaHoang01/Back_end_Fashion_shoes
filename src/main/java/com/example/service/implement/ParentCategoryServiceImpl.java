@@ -54,7 +54,7 @@ public class ParentCategoryServiceImpl implements ParentCategoryService {
                 ParentCategory parentCategory = new ParentCategory();
 
                 parentCategory.setName(parentCategoryRequest.getName());
-                parentCategory.setCreatedBy(admin.getId());
+                parentCategory.setCreatedBy(admin.getEmail());
                 parentCategory.setBrand(brand);
                 return parentCategoryRepository.save(parentCategory);
             } else {
@@ -78,7 +78,7 @@ public class ParentCategoryServiceImpl implements ParentCategoryService {
                 String token = jwtProvider.getTokenFromCookie(request);
                 User admin = userService.findUserProfileByJwt(token);
 
-                oldParentCategory.get().setUpdateBy(admin.getId());
+                oldParentCategory.get().setUpdateBy(admin.getEmail());
                 oldParentCategory.get().setName(parentCategoryRequest.getName());
 
                 return parentCategoryRepository.save(oldParentCategory.get());
@@ -102,12 +102,12 @@ public class ParentCategoryServiceImpl implements ParentCategoryService {
     }
 
     @Override
-    public Set<ParentCategory> getAllParentCategoryByBrandName(String name) throws CustomException {
-        Brand brand = brandRepository.findByName(name);
-        if (brand != null) {
-            return parentCategoryRepository.getAllParentCategoryByBrandName(name);
+    public Set<ParentCategory> getAllParentCategoryByBrandId(Long brandId) throws CustomException {
+        Optional<Brand> brand = brandRepository.findById(brandId);
+        if (brand.isPresent()) {
+            return parentCategoryRepository.getAllParentCategoryByBrandId(brandId);
         } else {
-            throw new CustomException("Brand not found with name: " + name);
+            throw new CustomException("Brand not found with name: " + brandId);
         }
     }
 

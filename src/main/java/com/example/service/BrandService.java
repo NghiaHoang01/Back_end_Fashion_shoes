@@ -11,5 +11,5 @@ public interface BrandService {
     Brand updateBrand(Long id, BrandRequest brand) throws CustomException;
     String deleteBrand(Long id) throws CustomException;
     Brand getBrandInformation(Long id) throws CustomException;
-    List<Brand> getAllBrand(int pageIndex, int pageSize);
+    List<Brand> getAllBrand();
 }

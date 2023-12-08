@@ -51,7 +51,7 @@ public class RoleServiceImpl implements RoleService {
 
             role.setName(roleRequest.getName());
             role.setDescription(roleRequest.getDescription());
-            role.setCreatedBy(user.getId());
+            role.setCreatedBy(user.getEmail());
 
             return roleRepository.save(role);
         }
@@ -89,7 +89,7 @@ public class RoleServiceImpl implements RoleService {
 
                 oldRole.get().setName(roleRequest.getName());
                 oldRole.get().setDescription(roleRequest.getDescription());
-                oldRole.get().setUpdateBy(user.getId());
+                oldRole.get().setUpdateBy(user.getEmail());
 
                 return roleRepository.save(oldRole.get());
             }else{

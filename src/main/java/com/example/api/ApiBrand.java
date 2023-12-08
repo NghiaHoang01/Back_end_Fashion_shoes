@@ -5,22 +5,21 @@ import com.example.service.implement.BrandServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController("brandOfUser")
 @RequestMapping("/api")
+@CrossOrigin(origins = "http://localhost:3000/", allowCredentials = "true")
 public class ApiBrand {
     @Autowired
     private BrandServiceImpl brandService;
 
-    @GetMapping("/brand")
-    public ResponseEntity<?> getBrand(@RequestParam("pageIndex") int pageIndex, @RequestParam("pageSize")int pageSize){
-        List<Brand> brands= brandService.getAllBrand(pageIndex,pageSize);
+    // CALL SUCCESS
+    @GetMapping("/brands")
+    public ResponseEntity<?> getBrand(){
+        List<Brand> brands= brandService.getAllBrand();
         return new ResponseEntity<>(brands, HttpStatus.OK);
     }
 }

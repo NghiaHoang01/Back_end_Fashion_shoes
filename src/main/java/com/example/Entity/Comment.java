@@ -4,26 +4,26 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 import java.util.List;
-import java.util.Set;
 
 @Entity
 @Table(name = "comment")
-public class Comment extends BaseEntity{
+public class Comment extends BaseEntity {
     @Column(name = "comment")
     private String comment;
 
-//    @JsonIgnore
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "product_id")
     private Product productOfComment;
 
-//    @JsonIgnore
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User userOfComment;
 
     @ElementCollection
-    private Set<ImageProduct> imageComments;
+    @Column(name = "image_base_64", columnDefinition = "LONGTEXT")
+    private List<String> imageComments;
 
     public String getComment() {
         return comment;
@@ -49,18 +49,18 @@ public class Comment extends BaseEntity{
         this.userOfComment = userOfComment;
     }
 
-    public Set<ImageProduct> getImageComments() {
+    public List<String> getImageComments() {
         return imageComments;
     }
 
-    public void setImageComments(Set<ImageProduct> imageComments) {
+    public void setImageComments(List<String> imageComments) {
         this.imageComments = imageComments;
     }
 
     public Comment() {
     }
 
-    public Comment(String comment, Product productOfComment, User userOfComment, Set<ImageProduct> imageComments) {
+    public Comment(String comment, Product productOfComment, User userOfComment, List<String> imageComments) {
         this.comment = comment;
         this.productOfComment = productOfComment;
         this.userOfComment = userOfComment;

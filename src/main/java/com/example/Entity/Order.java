@@ -1,5 +1,6 @@
 package com.example.Entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
@@ -44,6 +45,7 @@ public class Order extends BaseEntity {
     @Column(name = "delivery_date")
     private LocalDateTime deliveryDate;
 
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;

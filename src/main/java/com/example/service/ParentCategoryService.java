@@ -14,7 +14,7 @@ public interface ParentCategoryService {
 
     String deleteParentCategory(Long id) throws CustomException;
 
-    Set<ParentCategory> getAllParentCategoryByBrandName(String name) throws CustomException;
+    Set<ParentCategory> getAllParentCategoryByBrandId(Long brandId) throws CustomException;
 
     List<ParentCategory> getAllParentCategory(int pageIndex, int pageSize);
 }

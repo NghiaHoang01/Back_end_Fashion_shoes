@@ -14,12 +14,14 @@ public class UserResponse{
     private String province;
     private String district;
     private String ward;
+    private String imageBase64;
 
     public UserResponse() {
     }
 
     public UserResponse(Long id, LocalDate createAt, String firstName, String lastName,
-                        String mobile, String gender, String email, String address, String province, String district, String ward) {
+                        String mobile, String gender, String email, String address, String province,
+                        String district, String ward, String imageBase64) {
         this.id = id;
         this.createAt = createAt;
         this.firstName = firstName;
@@ -31,6 +33,7 @@ public class UserResponse{
         this.province = province;
         this.district = district;
         this.ward = ward;
+        this.imageBase64 = imageBase64;
     }
 
     public Long getId() {
@@ -119,5 +122,13 @@ public class UserResponse{
 
     public void setWard(String ward) {
         this.ward = ward;
+    }
+
+    public String getImageBase64() {
+        return imageBase64;
+    }
+
+    public void setImageBase64(String imageBase64) {
+        this.imageBase64 = imageBase64;
     }
 }

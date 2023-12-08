@@ -11,7 +11,7 @@ import java.util.Set;
 public class ChildCategory extends BaseEntity{
     private String name;
 
-    @JsonIgnore
+//    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "parentCategory_id")
     private ParentCategory parentCategoryOfChildCategory;
@@ -28,6 +28,7 @@ public class ChildCategory extends BaseEntity{
         this.name = name;
     }
 
+    @JsonIgnore
     public ParentCategory getParentCategory() {
         return parentCategoryOfChildCategory;
     }

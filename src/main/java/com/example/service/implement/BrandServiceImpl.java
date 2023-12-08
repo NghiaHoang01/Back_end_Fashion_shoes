@@ -41,7 +41,7 @@ public class BrandServiceImpl implements BrandService {
 
             Brand brand = new Brand();
             brand.setName(brandRequest.getName());
-            brand.setCreatedBy(admin.getId());
+            brand.setCreatedBy(admin.getEmail());
 
             return brandRepository.save(brand);
         }else{
@@ -62,7 +62,7 @@ public class BrandServiceImpl implements BrandService {
                 String token = jwtProvider.getTokenFromCookie(request);
                 User admin = userService.findUserProfileByJwt(token);
 
-                oldBrand.get().setUpdateBy(admin.getId());
+                oldBrand.get().setUpdateBy(admin.getEmail());
                 oldBrand.get().setName(brandRequest.getName());
 
                 return brandRepository.save(oldBrand.get());
@@ -92,8 +92,7 @@ public class BrandServiceImpl implements BrandService {
     }
 
     @Override
-    public List<Brand> getAllBrand(int pageIndex, int pageSize) {
-        Pageable pageable = PageRequest.of(pageIndex-1, pageSize);
-        return brandRepository.findAll(pageable).getContent();
+    public List<Brand> getAllBrand() {
+        return brandRepository.findAll();
     }
 }

@@ -8,16 +8,50 @@ import java.util.List;
 
 public interface ProductRepository extends JpaRepository<Product, Long> {
 
-    @Query("select p from Product p where p.brandProduct = ?1 and " +
-            "p.parentCategoryOfProduct.name = ?2 and " +
-            "p.childCategoryOfProduct.name = ?3 and " +
-            "((?4 is null and ?5 is null ) or (p.discountedPrice between ?4 and ?5))" +
+    @Query("select p from Product p where (?1 is null or p.name like %?1%) and" +
+            "(?2 is null or p.brandProduct.id = ?2) and " +
+            "(?3 is null or p.parentCategoryOfProduct.id = ?3) and " +
+            "(?4 is null or p.childCategoryOfProduct.id = ?4) and " +
+            "(?5 is null or p.color = ?5) and" +
+            "(?6 is null and ?7 is null or p.discountedPrice between ?6 and ?7)" +
             "order by " +
-            "case when ?6 = 'price_low' then p.discountedPrice end asc," +
-            "case when ?6 = 'price_hight' then p.discountedPrice end desc," +
-            "case when ?6 = 'newest' then p.id end desc")
-    List<Product> filterProducts(String brand, String parentCategory, String childCategory,
-                                 double minPrice, double maxPrice, String sort);
+            "case when ?8 = 'price_low' then p.discountedPrice end asc," +
+            "case when ?8 = 'price_hight' then p.discountedPrice end desc," +
+            "case when ?8 = 'newest' then p.id end desc")
+    List<Product> filterProducts(String name, Long brandId, Long parentCategoryId, Long childCategoryId, String color,
+                                 Double minPrice, Double maxPrice, String sort);
+
+    @Query("select p from Product p where (?1 is null or p.name like %?1%) " +
+            "and (?2 is null or p.brandProduct.id = ?2)" +
+            "and (?3 is null or p.parentCategoryOfProduct.id = ?3)" +
+            "and (?4 is null or p.childCategoryOfProduct.id = ?4)" +
+            "and (?5 is null or p.color = ?5)" +
+            "and (?6 is null or p.discountedPercent between 0 and ?6)" +
+            "and (?7 is null or p.createdBy = ?7)" +
+            "and (?8 is null or p.updateBy = ?8)")
+    List<Product> filterProductsByAdmin(String name, Long brandId, Long parentCategoryId, Long childCategoryId,
+                                        String color, Integer discountedPercent, String createBy, String updateBy);
+
+    @Query("select p.mainImageBase64 from Product p where p.id=?1")
+    String getMainImageBase64(Long id);
+
+    @Query("select p.imageSecondaries from Product p where p.id =?1")
+    List<String> getSecondaryImagesBase64(Long id);
+
+    List<Product> findTop12ByOrderByIdDesc();
+
+    List<Product> findTop12ByOrderByQuantityAsc();
+
+    List<Product> findTop12ByOrderByQuantityDesc();
+
+    @Query("select max (p.discountedPrice) from Product p ")
+    Long getTheHighestPriceOfProduct();
+
+    // Lấy ra sản phẩm có cùng brand nhưng không lấy thêm sản phẩm chính nữa
+    @Query(value = "select p from Product p where p.brandProduct.id = ?1 and p.id <> ?2  order by p.id desc limit 12")
+    List<Product> findTop12ByBrandProductId(Long brandId, Long productId);
+
+    // not test
 
     @Query("select p from Product p where p.brandProduct.name = ?1 order by p.id desc")
     List<Product> getAllProductByBrandName(String brandName);
@@ -27,9 +61,9 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
     @Query("select p from Product p where p.brandProduct.name = ?1 and p.parentCategoryOfProduct.name = ?2 and p.childCategoryOfProduct.name = ?3 order by p.id desc")
     List<Product> getAllProductByChildCategory(String brand, String parentCategory, String childCategory);
-    List<Product> findAllByOrderByIdDesc();
 
     Product findTop1ByOrderByIdDesc();
+
     @Query("select p from Product p where p.name like %?1% order by p.id desc")
     List<Product> getAllProductBySearch(String search);
 

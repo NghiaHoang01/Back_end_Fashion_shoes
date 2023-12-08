@@ -69,7 +69,7 @@ public class OrderServiceImpl implements OrderService {
             order.setTransportFee(30000L);
         }
         order.setTransactionId(orderRequest.getTransactionId());
-        order.setCreatedBy(user.getId());
+        order.setCreatedBy(user.getEmail());
 
         for (OrderProductQuantityRequest p : orderProductQuantityRequests) {
             Product product = productRepository.findById(p.getProductId()).get();
@@ -94,7 +94,7 @@ public class OrderServiceImpl implements OrderService {
                 orderLine.setProduct(product.get());
                 orderLine.setQuantity(productOrder.getQuantity());
                 orderLine.setSize(productOrder.getSize());
-                orderLine.setCreatedBy(user.getId());
+                orderLine.setCreatedBy(user.getEmail());
                 orderLine.setTotalPrice(productOrder.getQuantity() * product.get().getDiscountedPrice());
 
                 orderLineRepository.save(orderLine);

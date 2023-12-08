@@ -1,6 +1,7 @@
 package com.example.Entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 
 import java.util.HashSet;
@@ -11,7 +12,6 @@ import java.util.Set;
 public class ParentCategory extends BaseEntity{
     private String name;
 
-    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "brand_id")
     private Brand brandOfParentCategory;
@@ -32,6 +32,7 @@ public class ParentCategory extends BaseEntity{
         this.name = name;
     }
 
+    @JsonIgnore
     public Brand getBrand() {
         return brandOfParentCategory;
     }

@@ -1,30 +1,30 @@
 package com.example.request;
 
 public class PasswordRequest {
-    private String password;
-    private String repeatPassword;
+    private String oldPassword;
+    private String newPassword;
 
     public PasswordRequest() {
     }
 
-    public PasswordRequest(String password) {
-        this.password = password;
+    public PasswordRequest(String oldPassword, String newPassword) {
+        this.oldPassword = oldPassword;
+        this.newPassword = newPassword;
     }
 
-    public String getPassword() {
-        return password;
+    public String getOldPassword() {
+        return oldPassword;
     }
 
-    public PasswordRequest(String password, String repeatPassword) {
-        this.password = password;
-        this.repeatPassword = repeatPassword;
+    public void setOldPassword(String oldPassword) {
+        this.oldPassword = oldPassword;
     }
 
-    public String getRepeatPassword() {
-        return repeatPassword;
+    public String getNewPassword() {
+        return newPassword;
     }
 
-    public void setRepeatPassword(String repeatPassword) {
-        this.repeatPassword = repeatPassword;
+    public void setNewPassword(String newPassword) {
+        this.newPassword = newPassword;
     }
 }

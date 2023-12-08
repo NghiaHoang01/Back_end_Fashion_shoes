@@ -12,5 +12,5 @@ public interface ChildCategoryService {
     String deleteChildCategory(Long id) throws CustomException;
     List<ChildCategory> getAllChildCategory(int pageIndex, int pageSize);
 
-    List<ChildCategory> getAllChildCategoryByParentCategoryNameAndBrandName(String parentCategoryName, String brandName) throws CustomException;
+    List<ChildCategory> getAllChildCategoryByParentCategoryId(Long parentCategoryId) throws CustomException;
 }

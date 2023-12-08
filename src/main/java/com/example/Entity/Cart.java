@@ -1,5 +1,6 @@
 package com.example.Entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import org.springframework.stereotype.Component;
 
@@ -19,6 +20,7 @@ public class Cart extends BaseEntity{
     @JoinColumn(name = "product_id")
     private Product product;
 
+//    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
@@ -58,6 +60,7 @@ public class Cart extends BaseEntity{
         this.product = product;
     }
 
+    @JsonIgnore
     public User getUser() {
         return user;
     }

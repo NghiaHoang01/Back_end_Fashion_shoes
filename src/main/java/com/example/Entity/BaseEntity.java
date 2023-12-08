@@ -33,10 +33,10 @@ public abstract class BaseEntity {
     private LocalDate updateAt;
 
     @Column(name = "created_by")
-    private Long createdBy;
+    private String createdBy;
 
     @Column(name = "update_by")
-    private Long updateBy;
+    private String updateBy;
 
     public Long getId() {
         return id;
@@ -62,19 +62,19 @@ public abstract class BaseEntity {
         this.updateAt = updateAt;
     }
 
-    public Long getCreatedBy() {
+    public String getCreatedBy() {
         return createdBy;
     }
 
-    public void setCreatedBy(Long createdBy) {
+    public void setCreatedBy(String createdBy) {
         this.createdBy = createdBy;
     }
 
-    public Long getUpdateBy() {
+    public String getUpdateBy() {
         return updateBy;
     }
 
-    public void setUpdateBy(Long updateBy) {
+    public void setUpdateBy(String updateBy) {
         this.updateBy = updateBy;
     }
 }

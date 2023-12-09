@@ -5,13 +5,16 @@ public class OrderProductQuantityRequest {
     private int size;
     private int quantity;
 
+    private Long totalPrice;
+
     public OrderProductQuantityRequest() {
     }
 
-    public OrderProductQuantityRequest(Long productId, int size, int quantity) {
+    public OrderProductQuantityRequest(Long productId, int size, int quantity, Long totalPrice) {
         this.productId = productId;
         this.size = size;
         this.quantity = quantity;
+        this.totalPrice = totalPrice;
     }
 
     public Long getProductId() {
@@ -36,5 +39,13 @@ public class OrderProductQuantityRequest {
 
     public void setQuantity(int quantity) {
         this.quantity = quantity;
+    }
+
+    public Long getTotalPrice() {
+        return totalPrice;
+    }
+
+    public void setTotalPrice(Long totalPrice) {
+        this.totalPrice = totalPrice;
     }
 }

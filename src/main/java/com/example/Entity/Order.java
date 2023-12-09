@@ -9,6 +9,7 @@ import java.util.Set;
 @Entity
 @Table(name = "orders")
 public class Order extends BaseEntity {
+
     @Column(name = "full_name")
     private String fullName;
 
@@ -42,15 +43,28 @@ public class Order extends BaseEntity {
     @Column(name = "transaction_id")
     private String transactionId;
 
+    @Column(name = "order_date")
+    private LocalDateTime orderDate;
+
     @Column(name = "delivery_date")
     private LocalDateTime deliveryDate;
+
+    @Column(name = "receiving_date")
+    private LocalDateTime receivingDate;
+
+    @Column(name = "note", columnDefinition = "LONGTEXT")
+    private String note;
+
+    @Column(name = "payment_method")
+    private String paymentMethod;
 
     @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
 
-    @OneToMany(mappedBy = "order")
+    @JsonIgnore
+    @OneToMany(mappedBy = "order", cascade=CascadeType.REMOVE, orphanRemoval=true)
     private Set<OrderLine> orderLines;
 
     public String getFullName() {
@@ -165,12 +179,45 @@ public class Order extends BaseEntity {
         this.deliveryDate = deliveryDate;
     }
 
+    public String getNote() {
+        return note;
+    }
+
+    public void setNote(String note) {
+        this.note = note;
+    }
+
+    public LocalDateTime getReceivingDate() {
+        return receivingDate;
+    }
+
+    public void setReceivingDate(LocalDateTime receivingDate) {
+        this.receivingDate = receivingDate;
+    }
+
+    public String getPaymentMethod() {
+        return paymentMethod;
+    }
+
+    public void setPaymentMethod(String paymentMethod) {
+        this.paymentMethod = paymentMethod;
+    }
+
     public Order() {
     }
 
-    public Order(String fullName, String phoneNumber, String alternatePhoneNumber, String address, String province, String district, String ward,
-                 double totalPrice, String status, double transportFee, String transactionId, LocalDateTime deliveryDate, User user,
-                 Set<OrderLine> orderLines) {
+    public LocalDateTime getOrderDate() {
+        return orderDate;
+    }
+
+    public void setOrderDate(LocalDateTime orderDate) {
+        this.orderDate = orderDate;
+    }
+
+    public Order(String fullName, String phoneNumber, String alternatePhoneNumber, String address,
+                 String province, String district, String ward, double totalPrice, String status,
+                 double transportFee, String transactionId, LocalDateTime orderDate, LocalDateTime deliveryDate,
+                 LocalDateTime receivingDate, String note, String paymentMethod, User user, Set<OrderLine> orderLines) {
         this.fullName = fullName;
         this.phoneNumber = phoneNumber;
         this.alternatePhoneNumber = alternatePhoneNumber;
@@ -182,7 +229,11 @@ public class Order extends BaseEntity {
         this.status = status;
         this.transportFee = transportFee;
         this.transactionId = transactionId;
+        this.orderDate = orderDate;
         this.deliveryDate = deliveryDate;
+        this.receivingDate = receivingDate;
+        this.note = note;
+        this.paymentMethod = paymentMethod;
         this.user = user;
         this.orderLines = orderLines;
     }

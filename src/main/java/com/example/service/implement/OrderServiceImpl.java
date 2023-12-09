@@ -10,6 +10,8 @@ import com.example.repository.OrderRepository;
 import com.example.repository.ProductRepository;
 import com.example.request.OrderProductQuantityRequest;
 import com.example.request.OrderRequest;
+import com.example.response.OrderLineResponse;
+import com.example.response.OrderResponse;
 import com.example.service.OrderService;
 import com.example.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -41,80 +43,162 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     @Transactional
-    public void placeOrder(OrderRequest orderRequest, Boolean isSingleProductBuyNow) throws CustomException {
-        List<OrderProductQuantityRequest> orderProductQuantityRequests = orderRequest.getProductQuantities();
+    public void placeOrderCOD(OrderRequest orderRequest) throws CustomException {
+        // nếu số lượng sản phẩm order nhiều hơn số lượng sản phẩm có trong kho thì
+        // nhân viên phải liên hệ khách hàng để thỏa thuận lại về đơn hàng
+
+        // do mua hàng thông qua cart nên phải check xem các sản phẩm request có đang nằm trong giỏ hàng của user không !!!
+        // sau khi đặt hàng thành công thì sẽ xóa các sản phẩm đã đặt ở trong giỏ hàng của user
 
         String token = jwtProvider.getTokenFromCookie(request);
         User user = userService.findUserProfileByJwt(token);
 
-        double totalPrice = 0;
+        List<OrderProductQuantityRequest> orderProductQuantityRequests = orderRequest.getProductQuantities();
 
-        // nếu số lượng sản phẩm order nhiều hơn số lượng sản phẩm có trong kho thì nhân viên phải liên hệ khách hàng để thỏa thuận lại về đơn hàng
+        List<Cart> cartOfUser = cartRepository.findByUserIdOrderByIdDesc(user.getId());
 
-        // create order
-        Order order = new Order();
+        List<Boolean> checkExists = new ArrayList<>();
 
-        order.setAddress(orderRequest.getAddressOfUser());
-        order.setDistrict(orderRequest.getDistrict());
-        order.setProvince(orderRequest.getProvince());
-        order.setWard(orderRequest.getWard());
-        order.setFullName(orderRequest.getFullNameOfUser());
-        order.setUser(user);
-        order.setAlternatePhoneNumber(orderRequest.getAlternatePhoneNumber());
-        order.setPhoneNumber(orderRequest.getPhoneNumber());
-        order.setStatus(OrderConstant.ORDER_PENDING);
-        if (orderRequest.getProvince().equalsIgnoreCase("ho chi minh")) {
-            order.setTransportFee(0);
+        orderProductQuantityRequests.forEach(p -> {
+            checkExists.add(cartOfUser.stream().anyMatch(c -> (Objects.equals(c.getProduct().getId(), p.getProductId()) && (c.getSize() == p.getSize()))));
+        });
+
+        boolean existItem = checkExists.stream().anyMatch(exist -> !exist);
+
+        if (existItem) {
+            throw new CustomException("Some products not exits in your cart, Please check again and follow the correct steps !!!");
         } else {
-            order.setTransportFee(30000L);
-        }
-        order.setTransactionId(orderRequest.getTransactionId());
-        order.setCreatedBy(user.getEmail());
-
-        for (OrderProductQuantityRequest p : orderProductQuantityRequests) {
-            Product product = productRepository.findById(p.getProductId()).get();
-            totalPrice += p.getQuantity() * product.getDiscountedPrice();
-        }
-
-        order.setTotalPrice(totalPrice);
-
-        orderRepository.save(order);
-
-        // create order line
-        Order orderLasted = orderRepository.findTop1ByOrderByIdDesc();
-
-        for (OrderProductQuantityRequest productOrder : orderProductQuantityRequests) {
-            Optional<Product> product = productRepository.findById(productOrder.getProductId());
-
-            if (product.isPresent()) {
-                OrderLine orderLine = new OrderLine();
-
-                orderLine.setOrder(orderLasted);
-
-                orderLine.setProduct(product.get());
-                orderLine.setQuantity(productOrder.getQuantity());
-                orderLine.setSize(productOrder.getSize());
-                orderLine.setCreatedBy(user.getEmail());
-                orderLine.setTotalPrice(productOrder.getQuantity() * product.get().getDiscountedPrice());
-
-                orderLineRepository.save(orderLine);
-            } else {
-                throw new CustomException("Product not found !!!");
+            double totalPrice = 0;
+            // create order
+            Order order = new Order();
+            order.setAddress(orderRequest.getAddress());
+            order.setDistrict(orderRequest.getDistrict());
+            order.setProvince(orderRequest.getProvince());
+            order.setWard(orderRequest.getWard());
+            order.setFullName(orderRequest.getFullName());
+            order.setUser(user);
+            order.setAlternatePhoneNumber(orderRequest.getAlternatePhoneNumber());
+            order.setPhoneNumber(orderRequest.getPhoneNumber());
+            order.setStatus(OrderConstant.ORDER_PENDING);
+            order.setTransportFee(orderRequest.getTransportFee());
+            order.setCreatedBy(user.getEmail());
+            for (OrderProductQuantityRequest p : orderProductQuantityRequests) {
+                totalPrice += p.getTotalPrice();
             }
-        }
+            order.setTotalPrice(totalPrice + order.getTransportFee());
+            order.setNote(orderRequest.getNote());
+            order.setPaymentMethod(orderRequest.getPaymentMethod());
+            order.setOrderDate(LocalDateTime.now());
+            order = orderRepository.save(order); // => order success
 
-        //delete products that have been buy in the shopping cart
-        if (!isSingleProductBuyNow) {
-            List<Cart> carts = cartRepository.findByUserId(user.getId());
+            // create order line
+            for (OrderProductQuantityRequest productOrder : orderProductQuantityRequests) {
+                Optional<Product> product = productRepository.findById(productOrder.getProductId());
 
-            carts.forEach(c -> {
-                orderProductQuantityRequests.forEach(p -> {
-                    if (c.getSize() == p.getSize()
-                            && Objects.equals(c.getProduct().getId(), p.getProductId())) {
-                        cartRepository.deleteById(c.getId());
-                    }
-                });
+                if (product.isPresent()) {
+                    OrderLine orderLine = new OrderLine();
+
+                    orderLine.setOrder(order);
+                    orderLine.setProduct(product.get());
+                    orderLine.setQuantity(productOrder.getQuantity());
+                    orderLine.setSize(productOrder.getSize());
+                    orderLine.setCreatedBy(user.getEmail());
+                    orderLine.setTotalPrice(productOrder.getTotalPrice());
+
+                    orderLineRepository.save(orderLine);
+                } else {
+                    throw new CustomException("Product not found !!!");
+                }
+            }
+
+            // delete product in cart of user
+            cartOfUser.forEach(c -> {
+                boolean check = orderProductQuantityRequests.stream().anyMatch(p -> (p.getSize() == c.getSize() && Objects.equals(p.getProductId(), c.getProduct().getId())));
+                if (check) {
+                    cartRepository.delete(c);
+                }
             });
+        }
+    }
+
+    @Override
+    public List<OrderResponse> getOrderDetailsByUser() throws CustomException {
+        String token = jwtProvider.getTokenFromCookie(request);
+        User user = userService.findUserProfileByJwt(token);
+
+        List<OrderResponse> orderResponseList = new ArrayList<>();
+
+        List<Order> ordersOfUser = orderRepository.findByUserIdOrderByIdDesc(user.getId());
+
+        ordersOfUser.forEach(order -> {
+
+            OrderResponse orderResponse = new OrderResponse();
+
+            orderResponse.setId(order.getId());
+            orderResponse.setFullName(order.getFullName());
+            orderResponse.setPhoneNumber(order.getPhoneNumber());
+            orderResponse.setAlternatePhone(order.getAlternatePhoneNumber());
+            orderResponse.setAddress(order.getAddress());
+            orderResponse.setWard(order.getWard());
+            orderResponse.setDistrict(order.getDistrict());
+            orderResponse.setProvince(order.getProvince());
+            orderResponse.setNotes(order.getNote());
+            orderResponse.setDeliveryDate(order.getDeliveryDate());
+            orderResponse.setReceivingDate(order.getReceivingDate());
+            orderResponse.setPaymentMethod(order.getPaymentMethod());
+            orderResponse.setStatusOrder(order.getStatus());
+            orderResponse.setTotalPrice(order.getTotalPrice());
+            orderResponse.setTransportFee(order.getTransportFee());
+            orderResponse.setOrderDate(order.getOrderDate());
+            List<OrderLineResponse> orderLineResponseList = new ArrayList<>();
+
+            List<OrderLine> orderLines = orderLineRepository.findByOrderId(order.getId());
+
+            orderLines.forEach(orderLine -> {
+                Optional<Product> product = productRepository.findById(orderLine.getProduct().getId());
+
+                OrderLineResponse orderLineResponse = new OrderLineResponse();
+
+                orderLineResponse.setProductId(product.get().getId());
+                orderLineResponse.setMainImageBase64(product.get().getMainImageBase64());
+                orderLineResponse.setQuantity(orderLine.getQuantity());
+                orderLineResponse.setSize(orderLine.getSize());
+                orderLineResponse.setNameProduct(product.get().getName());
+                orderLineResponse.setTotalPrice(orderLine.getTotalPrice());
+
+                orderLineResponseList.add(orderLineResponse);
+            });
+
+            orderResponse.setOrderLines(orderLineResponseList);
+
+            orderResponseList.add(orderResponse);
+        });
+
+        return orderResponseList;
+    }
+
+    @Override
+    @Transactional
+    public void cancelOrderByUser(Long idOrder) throws CustomException {
+        String token = jwtProvider.getTokenFromCookie(request);
+        User user = userService.findUserProfileByJwt(token);
+
+        Optional<Order> order = orderRepository.findById(idOrder);
+
+        if (order.isPresent()) {
+            if(order.get().getStatus().equals(OrderConstant.ORDER_PENDING)){
+                // Kiểm tra xem user có sở hữu đơn hàng này không
+                if (Objects.equals(user.getId(), order.get().getUser().getId())) {
+                    orderRepository.delete(order.get());
+                } else {
+                    throw new CustomException("You do not have permission to delete this order !!!");
+                }
+            }else{
+                throw new CustomException("This order is on its way to you !!!");
+            }
+
+        } else {
+            throw new CustomException("Not found this order !!!");
         }
     }
 
@@ -131,43 +215,6 @@ public class OrderServiceImpl implements OrderService {
             int endIndex = Math.min(startIndex + pageable.getPageSize(), orders.size());
 
             return orders.subList(startIndex, endIndex);
-        }
-    }
-
-    @Override
-    public List<Order> getOrderDetailsByUser(int pageIndex, int pageSize) throws CustomException {
-        String token = jwtProvider.getTokenFromCookie(request);
-        User user = userService.findUserProfileByJwt(token);
-
-        List<Order> orders = orderRepository.findByUserId(user.getId());
-
-        Pageable pageable = PageRequest.of(pageIndex - 1, pageSize);
-
-        int startIndex = (int) pageable.getOffset();
-        int endIndex = Math.min(startIndex + pageable.getPageSize(), orders.size());
-
-        return orders.subList(startIndex, endIndex);
-    }
-
-    @Override
-    @Transactional
-    public String deleteOrderByUser(Long id) throws CustomException {
-        String token = jwtProvider.getTokenFromCookie(request);
-        User user = userService.findUserProfileByJwt(token);
-
-        Optional<Order> order = orderRepository.findById(id);
-
-        if (order.isPresent()) {
-
-            if (Objects.equals(user.getId(), order.get().getUser().getId()) && order.get().getStatus().equalsIgnoreCase(OrderConstant.ORDER_PENDING)) {
-                orderRepository.delete(order.get());
-
-                return "Delete success !!!";
-            } else {
-                throw new CustomException("You do not have permission to delete this order !!!");
-            }
-        } else {
-            return "Order not found with id " + id;
         }
     }
 
@@ -236,6 +283,7 @@ public class OrderServiceImpl implements OrderService {
 
         if (order.isPresent()) {
             order.get().setStatus(OrderConstant.ORDER_SHIPPED);
+            order.get().setDeliveryDate(LocalDateTime.now());
 
             return orderRepository.save(order.get());
         } else {
@@ -250,7 +298,7 @@ public class OrderServiceImpl implements OrderService {
 
         if (order.isPresent()) {
             order.get().setStatus(OrderConstant.ORDER_DELIVERED);
-            order.get().setDeliveryDate(LocalDateTime.now());
+            order.get().setReceivingDate(LocalDateTime.now());
 
             return orderRepository.save(order.get());
         } else {

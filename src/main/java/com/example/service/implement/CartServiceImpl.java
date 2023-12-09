@@ -39,7 +39,6 @@ public class CartServiceImpl implements CartService {
     @Autowired
     private UserService userService;
 
-    // CALL SUCCESS
     @Override
     @Transactional
     public CartItemResponse addToCart(CartRequest cartRequest) throws CustomException {
@@ -65,24 +64,25 @@ public class CartServiceImpl implements CartService {
 
                     // kiểm tra xem sản phẩm có size này đã có trong giỏ hàng hay chưa
                     if (checkCartItemExist.size() != 0) {
-                        Cart oldCart = checkCartItemExist.get(0);
-                        if (oldCart.getQuantity() <= 10) {
-                            oldCart.setQuantity(oldCart.getQuantity() + 1);
-                            oldCart.setTotalPrice(oldCart.getQuantity() * oldCart.getProduct().getDiscountedPrice());
-                            oldCart.setUpdateBy(user.getEmail());
-                        }
-                        cart = cartRepository.save(oldCart);
-                    } else {
-                        Cart c = new Cart();
-                        c.setUser(user);
-                        c.setProduct(product.get());
-                        c.setSize(cartRequest.getSize());
-                        c.setQuantity(cartRequest.getQuantity()); // quantity mặc định ban đầu là = 1
-                        c.setTotalPrice(product.get().getDiscountedPrice() * cartRequest.getQuantity());
-                        c.setCreatedBy(user.getEmail());
+                        // nếu sản phẩm đã tồn tại thì cập nhật lại bằng cách tạo ra cart item mới từ cái cũ và xóa đi cái cũ
+                        cart.setUser(user);
+                        cart.setQuantity(Math.min((checkCartItemExist.get(0).getQuantity() + 1), 10));
+                        cart.setTotalPrice(cart.getQuantity() * checkCartItemExist.get(0).getProduct().getDiscountedPrice());
+                        cart.setCreatedBy(user.getEmail());
+                        cart.setSize(checkCartItemExist.get(0).getSize());
+                        cart.setProduct(checkCartItemExist.get(0).getProduct());
+                        cart.setUpdateBy(user.getEmail());
 
-                        cart = cartRepository.save(c);
+                        cartRepository.delete(checkCartItemExist.get(0));
+                    } else {
+                        cart.setUser(user);
+                        cart.setProduct(product.get());
+                        cart.setSize(cartRequest.getSize());
+                        cart.setQuantity(cartRequest.getQuantity()); // quantity mặc định ban đầu là = 1
+                        cart.setTotalPrice(product.get().getDiscountedPrice() * cartRequest.getQuantity());
+                        cart.setCreatedBy(user.getEmail());
                     }
+                    cart = cartRepository.save(cart);
 
                     cartItemResponse.setId(cart.getProduct().getId());
                     cartItemResponse.setIdProduct(cart.getProduct().getId());
@@ -176,7 +176,6 @@ public class CartServiceImpl implements CartService {
             throw new CustomException("Cart item not found with id: " + id);
         }
     }
-
 
     @Override
     @Transactional

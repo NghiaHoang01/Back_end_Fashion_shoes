@@ -3,45 +3,69 @@ package com.example.request;
 import java.util.List;
 
 public class OrderRequest {
-    private String fullNameOfUser;
-    private String addressOfUser;
+    private String fullName;
+    private String address;
     private String district;
     private String province;
     private String ward;
     private String phoneNumber;
     private String alternatePhoneNumber;
     private String transactionId;
+    private String paymentMethod;
+    private String note;
+    private double transportFee;
     private List<OrderProductQuantityRequest> productQuantities;
 
     public OrderRequest() {
     }
 
-    public OrderRequest(String fullNameOfUser, String addressOfUser, String district, String province, String ward, String phoneNumber, String alternatePhoneNumber, String transactionId, List<OrderProductQuantityRequest> productQuantities) {
-        this.fullNameOfUser = fullNameOfUser;
-        this.addressOfUser = addressOfUser;
+    public OrderRequest(String fullName, String address, String district, String province, String ward, String phoneNumber,
+                        String alternatePhoneNumber, String transactionId, String paymentMethod,
+                        String note, double transportFee, List<OrderProductQuantityRequest> productQuantities) {
+        this.fullName = fullName;
+        this.address = address;
         this.district = district;
         this.province = province;
         this.ward = ward;
         this.phoneNumber = phoneNumber;
         this.alternatePhoneNumber = alternatePhoneNumber;
         this.transactionId = transactionId;
+        this.paymentMethod = paymentMethod;
+        this.note = note;
+        this.transportFee = transportFee;
         this.productQuantities = productQuantities;
     }
 
-    public String getFullNameOfUser() {
-        return fullNameOfUser;
+    public String getPaymentMethod() {
+        return paymentMethod;
     }
 
-    public void setFullNameOfUser(String fullNameOfUser) {
-        this.fullNameOfUser = fullNameOfUser;
+    public void setPaymentMethod(String paymentMethod) {
+        this.paymentMethod = paymentMethod;
     }
 
-    public String getAddressOfUser() {
-        return addressOfUser;
+    public double getTransportFee() {
+        return transportFee;
     }
 
-    public void setAddressOfUser(String addressOfUser) {
-        this.addressOfUser = addressOfUser;
+    public void setTransportFee(double transportFee) {
+        this.transportFee = transportFee;
+    }
+
+    public String getFullName() {
+        return fullName;
+    }
+
+    public void setFullName(String fullName) {
+        this.fullName = fullName;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
     }
 
     public String getDistrict() {
@@ -98,5 +122,13 @@ public class OrderRequest {
 
     public void setProductQuantities(List<OrderProductQuantityRequest> productQuantities) {
         this.productQuantities = productQuantities;
+    }
+
+    public String getNote() {
+        return note;
+    }
+
+    public void setNote(String note) {
+        this.note = note;
     }
 }

@@ -11,10 +11,12 @@ import com.example.repository.ProductRepository;
 import com.example.request.OrderProductQuantityRequest;
 import com.example.request.OrderRequest;
 import com.example.response.OrderLineResponse;
+import com.example.response.OrderListResponse;
 import com.example.response.OrderResponse;
 import com.example.service.OrderService;
 import com.example.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
+import org.aspectj.weaver.ast.Or;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -22,6 +24,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.*;
 
 @Service
@@ -122,20 +125,15 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public List<OrderResponse> getOrderDetailsByUser() throws CustomException {
-        String token = jwtProvider.getTokenFromCookie(request);
-        User user = userService.findUserProfileByJwt(token);
-
+    public List<OrderResponse> getOrderResponses(List<Order> orders) {
         List<OrderResponse> orderResponseList = new ArrayList<>();
 
-        List<Order> ordersOfUser = orderRepository.findByUserIdOrderByIdDesc(user.getId());
-
-        ordersOfUser.forEach(order -> {
-
+        orders.forEach(order -> {
             OrderResponse orderResponse = new OrderResponse();
 
             orderResponse.setId(order.getId());
             orderResponse.setFullName(order.getFullName());
+            orderResponse.setEmail(order.getCreatedBy());
             orderResponse.setPhoneNumber(order.getPhoneNumber());
             orderResponse.setAlternatePhone(order.getAlternatePhoneNumber());
             orderResponse.setAddress(order.getAddress());
@@ -160,6 +158,7 @@ public class OrderServiceImpl implements OrderService {
                 OrderLineResponse orderLineResponse = new OrderLineResponse();
 
                 orderLineResponse.setProductId(product.get().getId());
+                orderLineResponse.setBrand(product.get().getBrandProduct().getName());
                 orderLineResponse.setMainImageBase64(product.get().getMainImageBase64());
                 orderLineResponse.setQuantity(orderLine.getQuantity());
                 orderLineResponse.setSize(orderLine.getSize());
@@ -173,8 +172,45 @@ public class OrderServiceImpl implements OrderService {
 
             orderResponseList.add(orderResponse);
         });
-
         return orderResponseList;
+    }
+
+    @Override
+    public List<OrderResponse> getOrderDetailsByUser(String orderStatus,String paymentMethod,
+                                                     LocalDateTime orderDateStart, LocalDateTime orderDateEnd,
+                                                     LocalDateTime deliveryDateStart, LocalDateTime deliveryDateEnd,
+                                                     LocalDateTime receivingDateStart, LocalDateTime receivingDateEnd) throws CustomException {
+        String token = jwtProvider.getTokenFromCookie(request);
+        User user = userService.findUserProfileByJwt(token);
+
+        List<Order> ordersOfUser = orderRepository.getOrdersByUser(user.getId(), orderStatus,paymentMethod,
+                orderDateStart, orderDateEnd,
+                deliveryDateStart, deliveryDateEnd,
+                receivingDateStart, receivingDateEnd);
+
+        return getOrderResponses(ordersOfUser);
+    }
+
+    @Override
+    public OrderListResponse getAllOrderDetailByAdmin(String orderBy, String phoneNumber, String orderStatus, String paymentMethod,
+                                                      String province, String district, String ward,
+                                                      LocalDateTime orderDateStart, LocalDateTime orderDateEnd,
+                                                      LocalDateTime deliveryDateStart, LocalDateTime deliveryDateEnd,
+                                                      LocalDateTime receivingDateStart, LocalDateTime receivingDateEnd,
+                                                      int pageIndex, int pageSize) {
+
+        List<Order> orderList = orderRepository.getOrdersByAdmin(orderBy, phoneNumber, orderStatus, paymentMethod, province, district,
+                ward, orderDateStart, orderDateEnd, deliveryDateStart, deliveryDateEnd, receivingDateStart, receivingDateEnd);
+
+        Pageable pageable = PageRequest.of(pageIndex - 1, pageSize);
+        int startIndex = (int) pageable.getOffset();
+        int endIndex = Math.min(startIndex + pageable.getPageSize(), orderList.size());
+
+        OrderListResponse orderListResponse = new OrderListResponse();
+        orderListResponse.setListOrders(getOrderResponses(orderList.subList(startIndex, endIndex)));
+        orderListResponse.setTotal((long) orderList.size());
+
+        return orderListResponse;
     }
 
     @Override
@@ -186,19 +222,135 @@ public class OrderServiceImpl implements OrderService {
         Optional<Order> order = orderRepository.findById(idOrder);
 
         if (order.isPresent()) {
-            if(order.get().getStatus().equals(OrderConstant.ORDER_PENDING)){
+            if (order.get().getStatus().equals(OrderConstant.ORDER_PENDING)) {
                 // Kiểm tra xem user có sở hữu đơn hàng này không
                 if (Objects.equals(user.getId(), order.get().getUser().getId())) {
                     orderRepository.delete(order.get());
                 } else {
                     throw new CustomException("You do not have permission to delete this order !!!");
                 }
-            }else{
+            } else {
                 throw new CustomException("This order is on its way to you !!!");
             }
 
         } else {
             throw new CustomException("Not found this order !!!");
+        }
+    }
+
+    @Override
+    @Transactional
+    public void markOrderConfirmed(Long id) throws CustomException {
+        Optional<Order> order = orderRepository.findById(id);
+
+        if (order.isPresent()) {
+            // cập nhật lại số lượng còn trong kho
+            order.get().getOrderLines().forEach(orderLine -> {
+                Optional<Product> product = productRepository.findById(orderLine.getProduct().getId());
+
+                if (product.isPresent()) {
+
+                    Set<Size> sizes = new HashSet<>();
+                    int quantity = 0;
+
+                    boolean checkSizeExist = false;  // => kiểm tra xem size này có tồn tại không
+
+                    // cập nhật lại số lượng tùng size
+                    for (Size size : product.get().getSizes()) {
+                        if (size.getName() == orderLine.getSize()) {
+                            size.setQuantity(size.getQuantity() - orderLine.getQuantity());
+                            sizes.add(size);
+                            checkSizeExist = true;
+                        }
+                        sizes.add(size);
+                    }
+
+                    if (!checkSizeExist) {
+                        try {
+                            throw new CustomException("Product " + product.get().getId() + " not have size " + orderLine.getSize() + " !!!");
+                        } catch (CustomException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
+
+                    // cập nhật lại tổng số lượng của sản phẩm
+                    for (Size size : sizes) {
+                        quantity += size.getQuantity();
+                    }
+
+                    product.get().setQuantity(quantity);
+                    product.get().setSizes(sizes);
+
+                    productRepository.save(product.get());
+                } else {
+                    try {
+                        throw new CustomException("Product not found with id: " + orderLine.getProduct().getId());
+                    } catch (CustomException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+            });
+
+            order.get().setStatus(OrderConstant.ORDER_CONFIRMED);
+
+            orderRepository.save(order.get());
+        } else {
+            throw new CustomException("Order not found with id " + id);
+        }
+    }
+
+    @Override
+    @Transactional
+    public void markOrderShipped(Long id) throws CustomException {
+        Optional<Order> order = orderRepository.findById(id);
+
+        if (order.isPresent()) {
+            order.get().setStatus(OrderConstant.ORDER_SHIPPED);
+            order.get().setDeliveryDate(LocalDateTime.now());
+
+            orderRepository.save(order.get());
+        } else {
+            throw new CustomException("Order not found with id " + id);
+        }
+    }
+
+    @Override
+    @Transactional
+    public void markOrderDelivered(Long id) throws CustomException {
+        Optional<Order> order = orderRepository.findById(id);
+
+        if (order.isPresent()) {
+            order.get().setStatus(OrderConstant.ORDER_DELIVERED);
+            order.get().setReceivingDate(LocalDateTime.now());
+
+            orderRepository.save(order.get());
+        } else {
+            throw new CustomException("Order not found with id " + id);
+        }
+    }
+
+    @Override
+    @Transactional
+    public void deleteOrderByAdmin(Long id) throws CustomException {
+        Optional<Order> order = orderRepository.findById(id);
+
+        if (order.isPresent()) {
+            orderRepository.delete(order.get());
+        } else {
+            throw new CustomException("Not found order have id: " + id + " !!!");
+        }
+    }
+
+    @Override
+    @Transactional
+    public void deleteSomeOrdersByAdmin(List<Long> listIdOrder) throws CustomException {
+        for (Long id : listIdOrder) {
+            Optional<Order> order = orderRepository.findById(id);
+            if (order.isPresent()) {
+                orderRepository.delete(order.get());
+            } else {
+                throw new CustomException("Not found order have id " + id + " !!!");
+            }
         }
     }
 
@@ -218,91 +370,5 @@ public class OrderServiceImpl implements OrderService {
         }
     }
 
-    @Override
-    @Transactional
-    public String deleteOrderByAdmin(Long id) throws CustomException {
-        Optional<Order> order = orderRepository.findById(id);
 
-        if (order.isPresent()) {
-            orderRepository.delete(order.get());
-
-            return "Delete success !!!";
-        } else {
-            return "Order not found with id " + id;
-        }
-    }
-
-    @Override
-    @Transactional
-    public Order markOrderConfirmed(Long id) throws CustomException {
-        Optional<Order> order = orderRepository.findById(id);
-
-        if (order.isPresent()) {
-            // cập nhật lại số lượng còn trong kho
-            for (OrderLine orderLine : order.get().getOrderLines()) {
-                Optional<Product> product = productRepository.findById(orderLine.getProduct().getId());
-
-                if (product.isPresent()) {
-
-                    Set<Size> sizes = new HashSet<>();
-                    int quantity = 0;
-
-                    for (Size s : product.get().getSizes()) {
-                        if (orderLine.getSize() == s.getName()) {
-                            s.setQuantity(s.getQuantity() - orderLine.getQuantity());
-                            sizes.add(s);
-                        } else {
-                            sizes.add(s);
-                        }
-                        for (Size size : sizes) {
-                            quantity += size.getQuantity();
-                        }
-                    }
-
-                    product.get().setQuantity(quantity);
-                    product.get().setSizes(sizes);
-
-                    productRepository.save(product.get());
-                } else {
-                    throw new CustomException("Product not found with id: " + orderLine.getProduct().getId());
-                }
-            }
-
-            order.get().setStatus(OrderConstant.ORDER_CONFIRMED);
-
-            return orderRepository.save(order.get());
-        } else {
-            throw new CustomException("Order not found with id " + id);
-        }
-    }
-
-    @Override
-    @Transactional
-    public Order markOrderShipped(Long id) throws CustomException {
-        Optional<Order> order = orderRepository.findById(id);
-
-        if (order.isPresent()) {
-            order.get().setStatus(OrderConstant.ORDER_SHIPPED);
-            order.get().setDeliveryDate(LocalDateTime.now());
-
-            return orderRepository.save(order.get());
-        } else {
-            throw new CustomException("Order not found with id " + id);
-        }
-    }
-
-    @Override
-    @Transactional
-    public Order markOrderDelivered(Long id) throws CustomException {
-        Optional<Order> order = orderRepository.findById(id);
-
-        if (order.isPresent()) {
-            order.get().setStatus(OrderConstant.ORDER_DELIVERED);
-            order.get().setReceivingDate(LocalDateTime.now());
-
-            return orderRepository.save(order.get());
-        } else {
-            throw new CustomException("Order not found with id " + id);
-        }
-    }
 }

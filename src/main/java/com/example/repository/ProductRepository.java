@@ -28,9 +28,12 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
             "and (?5 is null or p.color = ?5)" +
             "and (?6 is null or p.discountedPercent between 0 and ?6)" +
             "and (?7 is null or p.createdBy = ?7)" +
-            "and (?8 is null or p.updateBy = ?8)")
+            "and (?8 is null or p.updateBy = ?8)" +
+            "and (?9 is null or p.id = ?9)" +
+            "and (?10 is null or p.price between 0 and ?10)" +
+            "order by p.id desc ")
     List<Product> filterProductsByAdmin(String name, Long brandId, Long parentCategoryId, Long childCategoryId,
-                                        String color, Integer discountedPercent, String createBy, String updateBy);
+                                        String color, Integer discountedPercent, String createBy, String updateBy,Long id, Double price);
 
     @Query("select p.mainImageBase64 from Product p where p.id=?1")
     String getMainImageBase64(Long id);

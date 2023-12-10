@@ -6,6 +6,7 @@ import java.util.List;
 public class OrderResponse {
     private Long id;
     private String fullName;
+    private String email;
     private String phoneNumber;
     private String alternatePhone;
     private String address;
@@ -25,12 +26,14 @@ public class OrderResponse {
     public OrderResponse() {
     }
 
-    public OrderResponse(Long id, String fullName, String phoneNumber, String alternatePhone,
-                         String address, String ward, String district, String province, String notes,
-                         LocalDateTime orderDate, LocalDateTime deliveryDate, LocalDateTime receivingDate,
-                         String paymentMethod, String statusOrder, double transportFee, double totalPrice, List<OrderLineResponse> orderLines) {
+    public OrderResponse(Long id, String fullName, String email, String phoneNumber,
+                         String alternatePhone, String address, String ward, String district,
+                         String province, String notes, LocalDateTime orderDate, LocalDateTime deliveryDate,
+                         LocalDateTime receivingDate, String paymentMethod, String statusOrder, double transportFee,
+                         double totalPrice, List<OrderLineResponse> orderLines) {
         this.id = id;
         this.fullName = fullName;
+        this.email = email;
         this.phoneNumber = phoneNumber;
         this.alternatePhone = alternatePhone;
         this.address = address;
@@ -46,6 +49,14 @@ public class OrderResponse {
         this.transportFee = transportFee;
         this.totalPrice = totalPrice;
         this.orderLines = orderLines;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 
     public Long getId() {

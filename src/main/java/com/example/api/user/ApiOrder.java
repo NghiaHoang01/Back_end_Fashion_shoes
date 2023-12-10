@@ -7,10 +7,12 @@ import com.example.response.Response;
 import com.example.response.ResponseData;
 import com.example.service.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController("orderUser")
@@ -22,8 +24,16 @@ public class ApiOrder {
 
     // CALL SUCCESS
     @GetMapping("/orders/detail")
-    public ResponseEntity<?> getOrderDetail() throws CustomException {
-        List<OrderResponse> orderResponses = orderDetailService.getOrderDetailsByUser();
+    public ResponseEntity<?> getOrderDetail(@RequestParam(value = "orderStatus", required = false) String orderStatus,
+                                            @RequestParam(value = "paymentMethod", required = false) String paymentMethod,
+                                            @RequestParam(value = "orderDateStart", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime orderDateStart,
+                                            @RequestParam(value = "orderDateEnd", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime orderDateEnd,
+                                            @RequestParam(value = "deliveryDateStart", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime deliveryDateStart,
+                                            @RequestParam(value = "deliveryDateEnd", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime deliveryDateEnd,
+                                            @RequestParam(value = "receivingDateStart", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime receivingDateStart,
+                                            @RequestParam(value = "receivingDateEnd", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime receivingDateEnd) throws CustomException {
+        List<OrderResponse> orderResponses = orderDetailService.getOrderDetailsByUser(orderStatus,paymentMethod, orderDateStart, orderDateEnd,
+                deliveryDateStart, deliveryDateEnd, receivingDateStart, receivingDateEnd);
 
         ResponseData<List<OrderResponse>> responseData = new ResponseData<>();
         responseData.setSuccess(true);

@@ -20,7 +20,7 @@ public interface ProductService {
     void deleteSomeProducts (List<Long> listIdProducts) throws CustomException;
 
     ProductResponse filterProductsByAdmin(String name, Long brandId, Long parentCategoryId, Long childCategoryId, String color,
-                                          Integer discountedPercent, String createBy, String updateBy, int pageIndex, int pageSize) throws CustomException;
+                                          Integer discountedPercent, String createBy, String updateBy,Long id, Double price, int pageIndex, int pageSize) throws CustomException;
 
     List<Product> getAllProduct();
 

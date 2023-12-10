@@ -175,9 +175,9 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public ProductResponse filterProductsByAdmin(String name, Long brandId, Long parentCategoryId, Long childCategoryId, String color,
-                                                 Integer discountedPercent, String createBy, String updateBy, int pageIndex, int pageSize) throws CustomException {
+                                                 Integer discountedPercent, String createBy, String updateBy,Long id, Double price, int pageIndex, int pageSize) throws CustomException {
         List<Product> productsFilter = productRepository.filterProductsByAdmin(name,
-                brandId, parentCategoryId, childCategoryId,color, discountedPercent, createBy, updateBy);
+                brandId, parentCategoryId, childCategoryId,color, discountedPercent, createBy, updateBy,id,price);
 
         Pageable pageable = PageRequest.of(pageIndex - 1, pageSize);
         int startIndex = (int) pageable.getOffset();

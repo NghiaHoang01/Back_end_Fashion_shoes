@@ -84,10 +84,12 @@ public class ApiProduct {
                                             @RequestParam(value = "discountedPercent",required = false) Integer discountedPercent,
                                             @RequestParam(value = "createBy",required = false) String createBy,
                                             @RequestParam(value = "updateBy",required = false) String updateBy,
+                                            @RequestParam(value = "id",required = false) Long id,
+                                            @RequestParam(value = "price",required = false) Double price,
                                             @RequestParam("pageIndex") int pageIndex,
                                             @RequestParam("pageSize") int pageSize) throws CustomException {
         ProductResponse productResponse = productService.filterProductsByAdmin(name, brandId, parentCategoryId, childCategoryId,
-                color, discountedPercent, createBy, updateBy, pageIndex, pageSize);
+                color, discountedPercent, createBy, updateBy,id, price, pageIndex, pageSize);
 
         ResponseData<ProductResponse> responseData = new ResponseData<>();
         responseData.setResults(productResponse);

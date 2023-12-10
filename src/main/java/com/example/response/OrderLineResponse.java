@@ -2,6 +2,7 @@ package com.example.response;
 
 public class OrderLineResponse {
     private Long productId;
+    private String brand;
     private String mainImageBase64;
     private String nameProduct;
     private int quantity;
@@ -11,13 +12,23 @@ public class OrderLineResponse {
     public OrderLineResponse() {
     }
 
-    public OrderLineResponse(Long productId, String mainImageBase64, String nameProduct, int quantity, int size, Double totalPrice) {
+    public OrderLineResponse(Long productId, String brand, String mainImageBase64,
+                             String nameProduct, int quantity, int size, Double totalPrice) {
         this.productId = productId;
+        this.brand = brand;
         this.mainImageBase64 = mainImageBase64;
         this.nameProduct = nameProduct;
         this.quantity = quantity;
         this.size = size;
         this.totalPrice = totalPrice;
+    }
+
+    public String getBrand() {
+        return brand;
+    }
+
+    public void setBrand(String brand) {
+        this.brand = brand;
     }
 
     public Long getProductId() {

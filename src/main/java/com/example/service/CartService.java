@@ -20,5 +20,5 @@ public interface CartService {
 
     CartResponse getCartDetails() throws CustomException;
 
-    int countCartItem();
+    int countCartItem() throws CustomException;
 }

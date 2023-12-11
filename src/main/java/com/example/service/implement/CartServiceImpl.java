@@ -258,7 +258,10 @@ public class CartServiceImpl implements CartService {
     }
 
     @Override
-    public int countCartItem() {
-        return (int) cartRepository.count();
+    public int countCartItem() throws CustomException {
+        String token = jwtProvider.getTokenFromCookie(request);
+        User user = userService.findUserProfileByJwt(token);
+
+        return cartRepository.countByUserId(user.getId());
     }
 }

@@ -80,7 +80,7 @@ public class ApiCart {
 
     // CALL SUCCESS
     @GetMapping("/cart")
-    public ResponseEntity<?> countCartItem() {
+    public ResponseEntity<?> countCartItem() throws CustomException {
         int total = cartService.countCartItem();
 
         ResponseData<Integer> responseData = new ResponseData<>();

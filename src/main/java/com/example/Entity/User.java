@@ -52,7 +52,7 @@ public class User extends BaseEntity {
     private Set<Role> roles = new HashSet<>();
 
     @JsonIgnore
-    @OneToMany(mappedBy = "userOfComment")
+    @OneToMany(mappedBy = "userOfComment", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private Set<Comment> comments = new HashSet<>();
 
     //getter-setter

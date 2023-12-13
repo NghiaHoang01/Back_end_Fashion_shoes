@@ -64,7 +64,7 @@ public class Order extends BaseEntity {
     private User user;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "order", cascade=CascadeType.REMOVE, orphanRemoval=true)
+    @OneToMany(mappedBy = "order", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private Set<OrderLine> orderLines;
 
     public String getFullName() {

@@ -17,7 +17,7 @@ public class ChildCategory extends BaseEntity{
     private ParentCategory parentCategoryOfChildCategory;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "childCategoryOfProduct")
+    @OneToMany(mappedBy = "childCategoryOfProduct", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private Set<Product> products = new HashSet<>();
 
     public String getName() {

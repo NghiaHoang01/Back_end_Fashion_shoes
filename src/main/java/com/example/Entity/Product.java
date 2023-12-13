@@ -38,7 +38,7 @@ public class Product extends BaseEntity {
     private String color;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "productOfComment")
+    @OneToMany(mappedBy = "productOfComment", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private Set<Comment> comments = new HashSet<>();
 
 //    @JsonIgnore

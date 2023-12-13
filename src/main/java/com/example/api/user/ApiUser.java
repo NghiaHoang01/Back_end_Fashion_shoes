@@ -86,19 +86,19 @@ public class ApiUser {
         }
     }
 
+    // CALL SUCCESS
+    @PutMapping("/password")
+    public ResponseEntity<?> changePassword(@RequestBody PasswordRequest passwordRequest) throws CustomException {
+        Response response = userService.changePassword(passwordRequest);
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
     @PostMapping("/password")
     public ResponseEntity<?> confirmPassword(@RequestBody PasswordRequest passwordRequest) throws CustomException {
         Boolean result = userService.confirmPassword(passwordRequest);
         Response response = new Response();
         response.setSuccess(result);
         response.setMessage(result ? "Password matched !!!" : "Password not match !!!");
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
-
-    // CALL SUCCESS
-    @PutMapping("/password")
-    public ResponseEntity<?> changePassword(@RequestBody PasswordRequest passwordRequest) throws CustomException {
-        Response response = userService.changePassword(passwordRequest);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 

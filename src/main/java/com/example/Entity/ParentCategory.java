@@ -17,11 +17,11 @@ public class ParentCategory extends BaseEntity{
     private Brand brandOfParentCategory;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "parentCategoryOfChildCategory")
+    @OneToMany(mappedBy = "parentCategoryOfChildCategory", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private Set<ChildCategory> childCategories = new HashSet<>();
 
     @JsonIgnore
-    @OneToMany(mappedBy = "parentCategoryOfProduct")
+    @OneToMany(mappedBy = "parentCategoryOfProduct", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private Set<Product> products = new HashSet<>();
 
     public String getName() {

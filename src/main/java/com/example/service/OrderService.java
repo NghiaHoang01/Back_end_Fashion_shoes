@@ -3,11 +3,10 @@ package com.example.service;
 import com.example.Entity.Order;
 import com.example.exception.CustomException;
 import com.example.request.OrderRequest;
-import com.example.response.OrderListResponse;
+import com.example.response.ListOrderResponse;
 import com.example.response.OrderResponse;
 
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.List;
 
 public interface OrderService {
@@ -19,7 +18,7 @@ public interface OrderService {
                                               LocalDateTime deliveryDateStart, LocalDateTime deliveryDateEnd,
                                               LocalDateTime receivingDateStart, LocalDateTime receivingDateEnd) throws CustomException;
 
-    OrderListResponse getAllOrderDetailByAdmin(String orderBy, String phoneNumber, String orderStatus, String paymentMethod,
+    ListOrderResponse getAllOrderDetailByAdmin(String orderBy, String phoneNumber, String orderStatus, String paymentMethod,
                                                String province, String district, String ward,
                                                LocalDateTime orderDateStart, LocalDateTime orderDateEnd,
                                                LocalDateTime deliveryDateStart, LocalDateTime deliveryDateEnd,

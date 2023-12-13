@@ -2,14 +2,14 @@ package com.example.request;
 
 public class ParentCategoryRequest {
     private String name;
-    private String brand;
+    private Long brandId;
 
     public ParentCategoryRequest() {
     }
 
-    public ParentCategoryRequest(String name, String brand) {
+    public ParentCategoryRequest(String name, Long brandId) {
         this.name = name;
-        this.brand = brand;
+        this.brandId = brandId;
     }
 
     public String getName() {
@@ -20,11 +20,11 @@ public class ParentCategoryRequest {
         this.name = name;
     }
 
-    public String getBrand() {
-        return brand;
+    public Long getBrandId() {
+        return brandId;
     }
 
-    public void setBrand(String brand) {
-        this.brand = brand;
+    public void setBrandId(Long brandId) {
+        this.brandId = brandId;
     }
 }

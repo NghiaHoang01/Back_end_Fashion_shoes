@@ -12,7 +12,7 @@ public interface ParentCategoryService {
 
     ParentCategory updateParentCategory(Long id, ParentCategoryRequest parentCategoryRequest) throws CustomException;
 
-    String deleteParentCategory(Long id) throws CustomException;
+    void deleteParentCategory(Long id) throws CustomException;
 
     Set<ParentCategory> getAllParentCategoryByBrandId(Long brandId) throws CustomException;
 

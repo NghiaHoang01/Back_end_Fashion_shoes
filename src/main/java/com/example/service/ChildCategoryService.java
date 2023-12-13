@@ -9,7 +9,7 @@ import java.util.List;
 public interface ChildCategoryService {
     ChildCategory createChildCategory(ChildCategoryRequest childCategoryRequest) throws CustomException;
     ChildCategory updateChildCategory(Long id, ChildCategoryRequest childCategoryRequest) throws CustomException;
-    String deleteChildCategory(Long id) throws CustomException;
+    void deleteChildCategory(Long id) throws CustomException;
     List<ChildCategory> getAllChildCategory(int pageIndex, int pageSize);
 
     List<ChildCategory> getAllChildCategoryByParentCategoryId(Long parentCategoryId) throws CustomException;

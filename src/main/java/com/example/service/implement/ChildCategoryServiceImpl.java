@@ -39,17 +39,12 @@ public class ChildCategoryServiceImpl implements ChildCategoryService {
     @Override
     @Transactional
     public ChildCategory createChildCategory(ChildCategoryRequest childCategoryRequest) throws CustomException {
-        childCategoryRequest.setName(childCategoryRequest.getName().toUpperCase());
-        childCategoryRequest.setBrand(childCategoryRequest.getBrand().toUpperCase());
-        childCategoryRequest.setParentCategory(childCategoryRequest.getParentCategory().toUpperCase());
+            Optional<ParentCategory> parentCategory = parentCategoryRepository.findById(childCategoryRequest.getParentCategoryId());
 
-        Brand brand = brandRepository.findByName(childCategoryRequest.getBrand());
-        if(brand != null){
+            if(parentCategory.isPresent()){
+                childCategoryRequest.setName(childCategoryRequest.getName().toUpperCase());
 
-            ParentCategory parentCategory = parentCategoryRepository.findByNameAndBrandName(childCategoryRequest.getParentCategory(),brand.getName());
-
-            if(parentCategory != null){
-                ChildCategory check = childCategoryRepository.findByNameAndParentCategoryNameAndBrandName(childCategoryRequest.getName(),parentCategory.getName(),brand.getName());
+                ChildCategory check = childCategoryRepository.findByNameAndParentCategoryId(childCategoryRequest.getName(),parentCategory.get().getId());
 
                 if(check == null){
                     String token = jwtProvider.getTokenFromCookie(request);
@@ -57,7 +52,7 @@ public class ChildCategoryServiceImpl implements ChildCategoryService {
 
                     ChildCategory childCategory = new ChildCategory();
                     childCategory.setName(childCategoryRequest.getName());
-                    childCategory.setParentCategory(parentCategory);
+                    childCategory.setParentCategory(parentCategory.get());
                     childCategory.setCreatedBy(admin.getEmail());
 
                     return childCategoryRepository.save(childCategory);
@@ -65,11 +60,8 @@ public class ChildCategoryServiceImpl implements ChildCategoryService {
                     throw new CustomException("Child category with name: " + childCategoryRequest.getName() + " already exist !!!");
                 }
             }else{
-                throw new CustomException("Parent category with name " + childCategoryRequest.getParentCategory() + " of brand " + brand.getName() + " not already exist !!!");
+                throw new CustomException("Parent category not found !!!");
             }
-        }else{
-            throw new CustomException("Brand not found with name: " + childCategoryRequest.getBrand());
-        }
     }
 
     @Override
@@ -80,7 +72,7 @@ public class ChildCategoryServiceImpl implements ChildCategoryService {
         if(oldChildCategory.isPresent()){
             childCategoryRequest.setName(childCategoryRequest.getName().toUpperCase());
 
-            ChildCategory check = childCategoryRepository.findByNameAndParentCategoryNameAndBrandName(childCategoryRequest.getName(),oldChildCategory.get().getParentCategory().getName(),oldChildCategory.get().getParentCategory().getBrand().getName());
+            ChildCategory check = childCategoryRepository.findByNameAndParentCategoryId(childCategoryRequest.getName(),oldChildCategory.get().getParentCategory().getId());
 
             if(check == null || check.getName().equals(oldChildCategory.get().getName())){
                 String token = jwtProvider.getTokenFromCookie(request);
@@ -94,19 +86,18 @@ public class ChildCategoryServiceImpl implements ChildCategoryService {
                 throw new CustomException("Child category with name: " + childCategoryRequest.getName() + " already exist !!!");
             }
         }else{
-            throw new CustomException("Child category not found with id: " + id);
+            throw new CustomException("Child category not found !!!");
         }
     }
 
     @Override
     @Transactional
-    public String deleteChildCategory(Long id) throws CustomException {
+    public void deleteChildCategory(Long id) throws CustomException {
         Optional<ChildCategory> check = childCategoryRepository.findById(id);
         if(check.isPresent()){
             childCategoryRepository.delete(check.get());
-            return "Delete success !!!";
         }else{
-            return "Child category not found with id: " + id;
+            throw new CustomException("Child category not found with id: " + id);
         }
     }
 

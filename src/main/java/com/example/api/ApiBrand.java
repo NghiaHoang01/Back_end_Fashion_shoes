@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@RestController("brandOfUser")
+@RestController("brands")
 @RequestMapping("/api")
 @CrossOrigin(origins = "http://localhost:3000/", allowCredentials = "true")
 public class ApiBrand {

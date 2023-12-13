@@ -1,7 +1,7 @@
 package com.example.api.admin;
 
 import com.example.exception.CustomException;
-import com.example.response.OrderListResponse;
+import com.example.response.ListOrderResponse;
 import com.example.response.Response;
 import com.example.response.ResponseData;
 import com.example.service.OrderService;
@@ -38,11 +38,11 @@ public class ApiOrder {
                                               @RequestParam(value = "receivingDateEnd", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime receivingDateEnd,
                                               @RequestParam("pageIndex") int pageIndex,
                                               @RequestParam("pageSize") int pageSize) {
-        OrderListResponse orderResponseList = orderDetailService.getAllOrderDetailByAdmin(orderBy, phoneNumber, orderStatus, paymentMethod, province,
+        ListOrderResponse orderResponseList = orderDetailService.getAllOrderDetailByAdmin(orderBy, phoneNumber, orderStatus, paymentMethod, province,
                 district, ward, orderDateStart, orderDateEnd, deliveryDateStart,
                 deliveryDateEnd, receivingDateStart, receivingDateEnd, pageIndex, pageSize);
 
-        ResponseData<OrderListResponse> responseData = new ResponseData<>();
+        ResponseData<ListOrderResponse> responseData = new ResponseData<>();
         responseData.setSuccess(true);
         responseData.setResults(orderResponseList);
         responseData.setMessage("Filter orders success !!!");

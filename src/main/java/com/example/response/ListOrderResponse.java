@@ -2,14 +2,14 @@ package com.example.response;
 
 import java.util.List;
 
-public class OrderListResponse {
+public class ListOrderResponse {
     private List<OrderResponse> listOrders;
     private Long total;
 
-    public OrderListResponse() {
+    public ListOrderResponse() {
     }
 
-    public OrderListResponse(List<OrderResponse> listOrders, Long total) {
+    public ListOrderResponse(List<OrderResponse> listOrders, Long total) {
         this.listOrders = listOrders;
         this.total = total;
     }

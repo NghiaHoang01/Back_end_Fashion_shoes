@@ -3,8 +3,8 @@ package com.example.api.admin;
 import com.example.Entity.ChildCategory;
 import com.example.exception.CustomException;
 import com.example.request.ChildCategoryRequest;
-import com.example.response.ChildCategoryResponse;
 import com.example.response.Response;
+import com.example.response.ResponseData;
 import com.example.service.implement.ChildCategoryServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -15,9 +15,36 @@ import java.util.List;
 
 @RestController("ChildCategoryRoleAdmin")
 @RequestMapping("/api/admin")
+@CrossOrigin(origins = "http://localhost:3000/", allowCredentials = "true")
 public class ApiChildCategory {
     @Autowired
     private ChildCategoryServiceImpl childCategoryService;
+
+    // CALL SUCCESS
+    @PostMapping("/childCategory")
+    public ResponseEntity<?> createChildCategory(@RequestBody ChildCategoryRequest childCategoryRequest) throws CustomException {
+        ChildCategory childCategory = childCategoryService.createChildCategory(childCategoryRequest);
+
+        ResponseData<ChildCategory> responseData = new ResponseData<>();
+        responseData.setResults(childCategory);
+        responseData.setMessage("Child category created success !!!");
+        responseData.setSuccess(true);
+
+        return new ResponseEntity<>(responseData, HttpStatus.OK);
+    }
+
+    // CALL SUCCESS
+    @PutMapping("/childCategory")
+    public ResponseEntity<?> updateChildCategory(@RequestBody ChildCategoryRequest childCategoryRequest, @RequestParam("id")Long id) throws CustomException {
+        ChildCategory childCategory = childCategoryService.updateChildCategory(id,childCategoryRequest);
+
+        ResponseData<ChildCategory> responseData = new ResponseData<>();
+        responseData.setResults(childCategory);
+        responseData.setMessage("Child category updated success !!!");
+        responseData.setSuccess(true);
+
+        return new ResponseEntity<>(responseData, HttpStatus.OK);
+    }
 
     @GetMapping("/childCategory")
     public ResponseEntity<?> getAllChildCategory(@RequestParam("pageIndex") int pageIndex, @RequestParam("pageSize")int pageSize){
@@ -26,36 +53,12 @@ public class ApiChildCategory {
         return new ResponseEntity<>(childCategories, HttpStatus.OK);
     }
 
-    @PostMapping("/childCategory")
-    public ResponseEntity<?> createChildCategory(@RequestBody ChildCategoryRequest childCategoryRequest) throws CustomException {
-        ChildCategory childCategory = childCategoryService.createChildCategory(childCategoryRequest);
-
-        ChildCategoryResponse childCategoryResponse = new ChildCategoryResponse();
-        childCategoryResponse.setChildCategory(childCategory);
-        childCategoryResponse.setMessage("Child category created success !!!");
-        childCategoryResponse.setSuccess(true);
-
-        return new ResponseEntity<>(childCategoryResponse, HttpStatus.OK);
-    }
-
-    @PutMapping("/childCategory")
-    public ResponseEntity<?> updateChildCategory(@RequestBody ChildCategoryRequest childCategoryRequest, @RequestParam("id")Long id) throws CustomException {
-        ChildCategory childCategory = childCategoryService.updateChildCategory(id,childCategoryRequest);
-
-        ChildCategoryResponse childCategoryResponse = new ChildCategoryResponse();
-        childCategoryResponse.setChildCategory(childCategory);
-        childCategoryResponse.setMessage("Child category updated success !!!");
-        childCategoryResponse.setSuccess(true);
-
-        return new ResponseEntity<>(childCategoryResponse, HttpStatus.OK);
-    }
-
     @DeleteMapping("/childCategory")
     public ResponseEntity<?> deleteChildCategory(@RequestParam("id")Long id) throws CustomException {
-        String message = childCategoryService.deleteChildCategory(id);
+        childCategoryService.deleteChildCategory(id);
 
         Response response = new Response();
-        response.setMessage(message);
+        response.setMessage("Delete success !!!");
         response.setSuccess(true);
 
         return new ResponseEntity<>(response,HttpStatus.OK);

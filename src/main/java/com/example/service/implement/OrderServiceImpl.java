@@ -11,12 +11,11 @@ import com.example.repository.ProductRepository;
 import com.example.request.OrderProductQuantityRequest;
 import com.example.request.OrderRequest;
 import com.example.response.OrderLineResponse;
-import com.example.response.OrderListResponse;
+import com.example.response.ListOrderResponse;
 import com.example.response.OrderResponse;
 import com.example.service.OrderService;
 import com.example.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
-import org.aspectj.weaver.ast.Or;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -24,7 +23,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.*;
 
 @Service
@@ -192,7 +190,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public OrderListResponse getAllOrderDetailByAdmin(String orderBy, String phoneNumber, String orderStatus, String paymentMethod,
+    public ListOrderResponse getAllOrderDetailByAdmin(String orderBy, String phoneNumber, String orderStatus, String paymentMethod,
                                                       String province, String district, String ward,
                                                       LocalDateTime orderDateStart, LocalDateTime orderDateEnd,
                                                       LocalDateTime deliveryDateStart, LocalDateTime deliveryDateEnd,
@@ -206,11 +204,11 @@ public class OrderServiceImpl implements OrderService {
         int startIndex = (int) pageable.getOffset();
         int endIndex = Math.min(startIndex + pageable.getPageSize(), orderList.size());
 
-        OrderListResponse orderListResponse = new OrderListResponse();
-        orderListResponse.setListOrders(getOrderResponses(orderList.subList(startIndex, endIndex)));
-        orderListResponse.setTotal((long) orderList.size());
+        ListOrderResponse listOrderResponse = new ListOrderResponse();
+        listOrderResponse.setListOrders(getOrderResponses(orderList.subList(startIndex, endIndex)));
+        listOrderResponse.setTotal((long) orderList.size());
 
-        return orderListResponse;
+        return listOrderResponse;
     }
 
     @Override

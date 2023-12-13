@@ -39,6 +39,7 @@ public class ApiAdmin {
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
+    // CALL SUCCESS
     @PostMapping("/logout")
     public ResponseEntity<?> adminLogout() throws CustomException {
         CustomUserDetails admin = (CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();

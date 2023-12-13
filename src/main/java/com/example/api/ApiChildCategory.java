@@ -17,6 +17,7 @@ public class ApiChildCategory {
     @Autowired
     private ChildCategoryServiceImpl childCategoryService;
 
+    // CALL SUCCESS
     @GetMapping("/childCategories")
     public ResponseEntity<?> getChildCategoryByParentCategoryId(@RequestParam("parentCategoryId") Long parentCategoryId) throws CustomException {
         List<ChildCategory> childCategories = childCategoryService.getAllChildCategoryByParentCategoryId(parentCategoryId);

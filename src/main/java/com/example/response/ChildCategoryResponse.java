@@ -1,27 +1,40 @@
 package com.example.response;
 
-import com.example.Entity.ChildCategory;
-
-public class ChildCategoryResponse extends Response{
-    private ChildCategory childCategory;
+public class ChildCategoryResponse {
+    private Long id;
+    private Long parentCategoryId;
+    private String name;
 
     public ChildCategoryResponse() {
     }
 
-    public ChildCategoryResponse(ChildCategory childCategory) {
-        this.childCategory = childCategory;
+    public ChildCategoryResponse(Long id, Long parentCategoryId, String name) {
+        this.id = id;
+        this.parentCategoryId = parentCategoryId;
+        this.name = name;
     }
 
-    public ChildCategoryResponse(String message, Boolean success, ChildCategory childCategory) {
-        super(message, success);
-        this.childCategory = childCategory;
+    public Long getId() {
+        return id;
     }
 
-    public ChildCategory getChildCategory() {
-        return childCategory;
+    public void setId(Long id) {
+        this.id = id;
     }
 
-    public void setChildCategory(ChildCategory childCategory) {
-        this.childCategory = childCategory;
+    public Long getParentCategoryId() {
+        return parentCategoryId;
+    }
+
+    public void setParentCategoryId(Long parentCategoryId) {
+        this.parentCategoryId = parentCategoryId;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 }

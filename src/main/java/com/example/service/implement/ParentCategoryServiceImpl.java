@@ -36,16 +36,12 @@ public class ParentCategoryServiceImpl implements ParentCategoryService {
     @Override
     @Transactional
     public ParentCategory createdParentCategory(ParentCategoryRequest parentCategoryRequest) throws CustomException {
-        parentCategoryRequest.setName(parentCategoryRequest.getName().toUpperCase());
-        parentCategoryRequest.setBrand(parentCategoryRequest.getBrand().toUpperCase());
+        Optional<Brand> brand = brandRepository.findById(parentCategoryRequest.getBrandId());
 
-        Brand brand = brandRepository.findByName(parentCategoryRequest.getBrand());
+        if (brand.isPresent()) {
+            parentCategoryRequest.setName(parentCategoryRequest.getName().toUpperCase());
 
-        if (brand == null) {
-            throw new CustomException("Brand with name " + parentCategoryRequest.getBrand() + " not found !!!");
-        } else {
-
-            ParentCategory check = parentCategoryRepository.findByNameAndBrandName(parentCategoryRequest.getName(), brand.getName());
+            ParentCategory check = parentCategoryRepository.findByNameAndBrandId(parentCategoryRequest.getName(), brand.get().getId());
 
             if (check == null) {
                 String token = jwtProvider.getTokenFromCookie(request);
@@ -55,11 +51,14 @@ public class ParentCategoryServiceImpl implements ParentCategoryService {
 
                 parentCategory.setName(parentCategoryRequest.getName());
                 parentCategory.setCreatedBy(admin.getEmail());
-                parentCategory.setBrand(brand);
+                parentCategory.setBrand(brand.get());
+
                 return parentCategoryRepository.save(parentCategory);
             } else {
-                throw new CustomException("Parent category with name " + parentCategoryRequest.getName() + " of brand " + parentCategoryRequest.getBrand() + " already exist !!!");
+                throw new CustomException("Parent category with name " + parentCategoryRequest.getName() + " of brand " + brand.get().getName() + " already exist !!!");
             }
+        } else {
+            throw new CustomException("Brand not found !!!");
         }
     }
 
@@ -72,7 +71,7 @@ public class ParentCategoryServiceImpl implements ParentCategoryService {
 
             parentCategoryRequest.setName(parentCategoryRequest.getName().toUpperCase());
 
-            ParentCategory check = parentCategoryRepository.findByNameAndBrandName(parentCategoryRequest.getName(), oldParentCategory.get().getBrand().getName());
+            ParentCategory check = parentCategoryRepository.findByNameAndBrandId(parentCategoryRequest.getName(), oldParentCategory.get().getBrand().getId());
 
             if (check == null || check.getName().equals(oldParentCategory.get().getName())) {
                 String token = jwtProvider.getTokenFromCookie(request);
@@ -92,13 +91,13 @@ public class ParentCategoryServiceImpl implements ParentCategoryService {
 
     @Override
     @Transactional
-    public String deleteParentCategory(Long id) throws CustomException {
+    public void deleteParentCategory(Long id) throws CustomException {
         Optional<ParentCategory> parentCategory = parentCategoryRepository.findById(id);
         if (parentCategory.isPresent()) {
             parentCategoryRepository.deleteById(id);
-            return "Delete success !!!";
+        }else{
+            throw new CustomException("Not found parent category with id: " + id);
         }
-        return "Not found parent category with id: " + id;
     }
 
     @Override

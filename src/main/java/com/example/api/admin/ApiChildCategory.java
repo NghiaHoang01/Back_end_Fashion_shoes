@@ -46,13 +46,7 @@ public class ApiChildCategory {
         return new ResponseEntity<>(responseData, HttpStatus.OK);
     }
 
-    @GetMapping("/childCategory")
-    public ResponseEntity<?> getAllChildCategory(@RequestParam("pageIndex") int pageIndex, @RequestParam("pageSize")int pageSize){
-        List<ChildCategory> childCategories = childCategoryService.getAllChildCategory(pageIndex, pageSize);
-
-        return new ResponseEntity<>(childCategories, HttpStatus.OK);
-    }
-
+    // CALL SUCCESS
     @DeleteMapping("/childCategory")
     public ResponseEntity<?> deleteChildCategory(@RequestParam("id")Long id) throws CustomException {
         childCategoryService.deleteChildCategory(id);
@@ -63,4 +57,13 @@ public class ApiChildCategory {
 
         return new ResponseEntity<>(response,HttpStatus.OK);
     }
+
+    @GetMapping("/childCategory")
+    public ResponseEntity<?> getAllChildCategory(@RequestParam("pageIndex") int pageIndex, @RequestParam("pageSize")int pageSize){
+        List<ChildCategory> childCategories = childCategoryService.getAllChildCategory(pageIndex, pageSize);
+
+        return new ResponseEntity<>(childCategories, HttpStatus.OK);
+    }
+
+
 }

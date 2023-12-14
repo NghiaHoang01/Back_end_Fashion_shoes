@@ -40,9 +40,6 @@ public class Order extends BaseEntity {
     @Column(name = "transport_fee")
     private double transportFee;
 
-    @Column(name = "transaction_id")
-    private String transactionId;
-
     @Column(name = "order_date")
     private LocalDateTime orderDate;
 
@@ -51,6 +48,9 @@ public class Order extends BaseEntity {
 
     @Column(name = "receiving_date")
     private LocalDateTime receivingDate;
+
+    @Column(name = "pay")
+    private String pay;
 
     @Column(name = "note", columnDefinition = "LONGTEXT")
     private String note;
@@ -147,14 +147,6 @@ public class Order extends BaseEntity {
         this.transportFee = transportFee;
     }
 
-    public String getTransactionId() {
-        return transactionId;
-    }
-
-    public void setTransactionId(String transactionId) {
-        this.transactionId = transactionId;
-    }
-
     public User getUser() {
         return user;
     }
@@ -214,10 +206,18 @@ public class Order extends BaseEntity {
         this.orderDate = orderDate;
     }
 
-    public Order(String fullName, String phoneNumber, String alternatePhoneNumber, String address,
-                 String province, String district, String ward, double totalPrice, String status,
-                 double transportFee, String transactionId, LocalDateTime orderDate, LocalDateTime deliveryDate,
-                 LocalDateTime receivingDate, String note, String paymentMethod, User user, Set<OrderLine> orderLines) {
+    public String getPay() {
+        return pay;
+    }
+
+    public void setPay(String pay) {
+        this.pay = pay;
+    }
+
+    public Order(String fullName, String phoneNumber, String alternatePhoneNumber,
+                 String address, String province, String district, String ward, double totalPrice,
+                 String status, double transportFee, LocalDateTime orderDate, LocalDateTime deliveryDate,
+                 LocalDateTime receivingDate, String pay, String note, String paymentMethod, User user, Set<OrderLine> orderLines) {
         this.fullName = fullName;
         this.phoneNumber = phoneNumber;
         this.alternatePhoneNumber = alternatePhoneNumber;
@@ -228,10 +228,10 @@ public class Order extends BaseEntity {
         this.totalPrice = totalPrice;
         this.status = status;
         this.transportFee = transportFee;
-        this.transactionId = transactionId;
         this.orderDate = orderDate;
         this.deliveryDate = deliveryDate;
         this.receivingDate = receivingDate;
+        this.pay = pay;
         this.note = note;
         this.paymentMethod = paymentMethod;
         this.user = user;

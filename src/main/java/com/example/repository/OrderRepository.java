@@ -41,4 +41,8 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
                                 LocalDateTime orderDateStart, LocalDateTime orderDateEnd,
                                 LocalDateTime deliveryDateStart, LocalDateTime deliveryDateEnd,
                                 LocalDateTime receivingDateStart, LocalDateTime receivingDateEnd);
+
+
+    @Query("select o.id from Order o order by o.id desc limit 1")
+    long getOrderIdNewest();
 }

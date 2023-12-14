@@ -9,4 +9,8 @@ public class OrderConstant {
     public static final String ORDER_SHIPPED = "SHIPPED";
     public static final String ORDER_DELIVERED = "DELIVERED";
 
+    public static final String ORDER_PAID = "PAID";
+
+    public static final String ORDER_UNPAID = "UNPAID";
+
 }

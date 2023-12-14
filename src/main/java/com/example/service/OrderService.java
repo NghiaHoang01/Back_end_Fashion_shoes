@@ -11,6 +11,7 @@ import java.util.List;
 
 public interface OrderService {
     void placeOrderCOD(OrderRequest orderRequest) throws CustomException;
+    String placeOrderVnPay(long totalPrice, String orderInfo, String orderId);
     List<OrderResponse> getOrderResponses(List<Order> orders);
 
     List<OrderResponse> getOrderDetailsByUser(String orderStatus,String paymentMethod,
@@ -36,8 +37,6 @@ public interface OrderService {
 
     void deleteSomeOrdersByAdmin(List<Long> listIdOrder) throws CustomException;
 
-    List<Order> getAllOrderDetailsByStatus(String status, int pageIndex, int pageSize);
-
-
-
+    long findOrderIdNewest();
+    void updatePayOfOrderVNPay(String vnp_ResponseCode, Long orderId) throws CustomException;
 }

@@ -21,6 +21,7 @@ public class OrderResponse {
     private String statusOrder;
     private double transportFee;
     private double totalPrice;
+    private String pay;
     private List<OrderLineResponse> orderLines;
 
     public OrderResponse() {
@@ -30,7 +31,7 @@ public class OrderResponse {
                          String alternatePhone, String address, String ward, String district,
                          String province, String notes, LocalDateTime orderDate, LocalDateTime deliveryDate,
                          LocalDateTime receivingDate, String paymentMethod, String statusOrder, double transportFee,
-                         double totalPrice, List<OrderLineResponse> orderLines) {
+                         double totalPrice, String pay, List<OrderLineResponse> orderLines) {
         this.id = id;
         this.fullName = fullName;
         this.email = email;
@@ -48,7 +49,16 @@ public class OrderResponse {
         this.statusOrder = statusOrder;
         this.transportFee = transportFee;
         this.totalPrice = totalPrice;
+        this.pay = pay;
         this.orderLines = orderLines;
+    }
+
+    public String getPay() {
+        return pay;
+    }
+
+    public void setPay(String pay) {
+        this.pay = pay;
     }
 
     public String getEmail() {

@@ -10,7 +10,6 @@ public class OrderRequest {
     private String ward;
     private String phoneNumber;
     private String alternatePhoneNumber;
-    private String transactionId;
     private String paymentMethod;
     private String note;
     private double transportFee;
@@ -20,7 +19,7 @@ public class OrderRequest {
     }
 
     public OrderRequest(String fullName, String address, String district, String province, String ward, String phoneNumber,
-                        String alternatePhoneNumber, String transactionId, String paymentMethod,
+                        String alternatePhoneNumber, String paymentMethod,
                         String note, double transportFee, List<OrderProductQuantityRequest> productQuantities) {
         this.fullName = fullName;
         this.address = address;
@@ -29,7 +28,6 @@ public class OrderRequest {
         this.ward = ward;
         this.phoneNumber = phoneNumber;
         this.alternatePhoneNumber = alternatePhoneNumber;
-        this.transactionId = transactionId;
         this.paymentMethod = paymentMethod;
         this.note = note;
         this.transportFee = transportFee;
@@ -106,14 +104,6 @@ public class OrderRequest {
 
     public void setAlternatePhoneNumber(String alternatePhoneNumber) {
         this.alternatePhoneNumber = alternatePhoneNumber;
-    }
-
-    public String getTransactionId() {
-        return transactionId;
-    }
-
-    public void setTransactionId(String transactionId) {
-        this.transactionId = transactionId;
     }
 
     public List<OrderProductQuantityRequest> getProductQuantities() {

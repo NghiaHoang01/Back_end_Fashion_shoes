@@ -2,6 +2,7 @@ package com.example.service.implement;
 
 import com.example.Entity.*;
 import com.example.config.JwtProvider;
+import com.example.config.VNPayConfig;
 import com.example.constant.OrderConstant;
 import com.example.exception.CustomException;
 import com.example.repository.CartRepository;
@@ -22,6 +23,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -72,6 +77,7 @@ public class OrderServiceImpl implements OrderService {
             double totalPrice = 0;
             // create order
             Order order = new Order();
+
             order.setAddress(orderRequest.getAddress());
             order.setDistrict(orderRequest.getDistrict());
             order.setProvince(orderRequest.getProvince());
@@ -90,6 +96,7 @@ public class OrderServiceImpl implements OrderService {
             order.setNote(orderRequest.getNote());
             order.setPaymentMethod(orderRequest.getPaymentMethod());
             order.setOrderDate(LocalDateTime.now());
+            order.setPay(OrderConstant.ORDER_UNPAID);
             order = orderRepository.save(order); // => order success
 
             // create order line
@@ -123,6 +130,72 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    public String placeOrderVnPay(long totalPrice, String orderInfo, String orderId) {
+
+        String vnp_TxnRef = VNPayConfig.getRandomNumber(8);
+        String vnp_TmnCode = VNPayConfig.vnp_TmnCode;
+
+        Map<String, String> vnp_Params = new HashMap<>();
+        vnp_Params.put("vnp_Version", VNPayConfig.vnp_Version);
+        vnp_Params.put("vnp_Command", VNPayConfig.vnp_Command);
+        vnp_Params.put("vnp_TmnCode", vnp_TmnCode);
+        vnp_Params.put("vnp_Amount", String.valueOf(totalPrice * 100));
+        vnp_Params.put("vnp_CurrCode", "VND");
+
+        vnp_Params.put("vnp_TxnRef", vnp_TxnRef);
+        vnp_Params.put("vnp_OrderInfo", orderInfo + "-" + orderId);
+        vnp_Params.put("vnp_OrderType", VNPayConfig.orderType);
+
+        String locate = "vn";
+        vnp_Params.put("vnp_Locale", locate);
+
+        vnp_Params.put("vnp_ReturnUrl", VNPayConfig.vnp_ReturnUrl);
+        vnp_Params.put("vnp_IpAddr", VNPayConfig.vnp_IpAddr);
+
+        Calendar cld = Calendar.getInstance(TimeZone.getTimeZone("Etc/GMT+7"));
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
+        String vnp_CreateDate = formatter.format(cld.getTime());
+        vnp_Params.put("vnp_CreateDate", vnp_CreateDate);
+
+        cld.add(Calendar.MINUTE, 15);
+        String vnp_ExpireDate = formatter.format(cld.getTime());
+        vnp_Params.put("vnp_ExpireDate", vnp_ExpireDate);
+
+        List fieldNames = new ArrayList(vnp_Params.keySet());
+        Collections.sort(fieldNames);
+        StringBuilder hashData = new StringBuilder();
+        StringBuilder query = new StringBuilder();
+        Iterator itr = fieldNames.iterator();
+        while (itr.hasNext()) {
+            String fieldName = (String) itr.next();
+            String fieldValue = (String) vnp_Params.get(fieldName);
+            if ((fieldValue != null) && (fieldValue.length() > 0)) {
+                //Build hash data
+                hashData.append(fieldName);
+                hashData.append('=');
+                try {
+                    hashData.append(URLEncoder.encode(fieldValue, StandardCharsets.US_ASCII.toString()));
+                    //Build query
+                    query.append(URLEncoder.encode(fieldName, StandardCharsets.US_ASCII.toString()));
+                    query.append('=');
+                    query.append(URLEncoder.encode(fieldValue, StandardCharsets.US_ASCII.toString()));
+                } catch (UnsupportedEncodingException e) {
+                    e.printStackTrace();
+                }
+                if (itr.hasNext()) {
+                    query.append('&');
+                    hashData.append('&');
+                }
+            }
+        }
+        String queryUrl = query.toString();
+        String vnp_SecureHash = VNPayConfig.hmacSHA512(VNPayConfig.vnp_HashSecret, hashData.toString());
+        queryUrl += "&vnp_SecureHash=" + vnp_SecureHash;
+
+        return VNPayConfig.vnp_PayUrl + "?" + queryUrl;
+    }
+
+    @Override
     public List<OrderResponse> getOrderResponses(List<Order> orders) {
         List<OrderResponse> orderResponseList = new ArrayList<>();
 
@@ -132,6 +205,7 @@ public class OrderServiceImpl implements OrderService {
             orderResponse.setId(order.getId());
             orderResponse.setFullName(order.getFullName());
             orderResponse.setEmail(order.getCreatedBy());
+            orderResponse.setPay(order.getPay());
             orderResponse.setPhoneNumber(order.getPhoneNumber());
             orderResponse.setAlternatePhone(order.getAlternatePhoneNumber());
             orderResponse.setAddress(order.getAddress());
@@ -174,14 +248,14 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public List<OrderResponse> getOrderDetailsByUser(String orderStatus,String paymentMethod,
+    public List<OrderResponse> getOrderDetailsByUser(String orderStatus, String paymentMethod,
                                                      LocalDateTime orderDateStart, LocalDateTime orderDateEnd,
                                                      LocalDateTime deliveryDateStart, LocalDateTime deliveryDateEnd,
                                                      LocalDateTime receivingDateStart, LocalDateTime receivingDateEnd) throws CustomException {
         String token = jwtProvider.getTokenFromCookie(request);
         User user = userService.findUserProfileByJwt(token);
 
-        List<Order> ordersOfUser = orderRepository.getOrdersByUser(user.getId(), orderStatus,paymentMethod,
+        List<Order> ordersOfUser = orderRepository.getOrdersByUser(user.getId(), orderStatus, paymentMethod,
                 orderDateStart, orderDateEnd,
                 deliveryDateStart, deliveryDateEnd,
                 receivingDateStart, receivingDateEnd);
@@ -318,6 +392,7 @@ public class OrderServiceImpl implements OrderService {
         Optional<Order> order = orderRepository.findById(id);
 
         if (order.isPresent()) {
+            order.get().setPay(OrderConstant.ORDER_PAID);
             order.get().setStatus(OrderConstant.ORDER_DELIVERED);
             order.get().setReceivingDate(LocalDateTime.now());
 
@@ -353,20 +428,23 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public List<Order> getAllOrderDetailsByStatus(String status, int pageIndex, int pageSize) {
-        Pageable pageable = PageRequest.of(pageIndex - 1, pageSize);
-
-        if (status.equalsIgnoreCase("all")) {
-            return orderRepository.findAll(pageable).getContent();
-        } else {
-            List<Order> orders = orderRepository.findByStatus(status.toUpperCase());
-
-            int startIndex = (int) pageable.getOffset();
-            int endIndex = Math.min(startIndex + pageable.getPageSize(), orders.size());
-
-            return orders.subList(startIndex, endIndex);
-        }
+    public long findOrderIdNewest() {
+        return orderRepository.getOrderIdNewest();
     }
 
+    @Override
+    public void updatePayOfOrderVNPay(String vnp_ResponseCode, Long orderId) throws CustomException {
+        Optional<Order> order = orderRepository.findById(orderId);
+        if(order.isPresent()){
+            if(vnp_ResponseCode.equals("00")){
+                order.get().setPay(OrderConstant.ORDER_PAID);
+            }else{
+                order.get().setPay(OrderConstant.ORDER_UNPAID);
+            }
+            orderRepository.save(order.get());
+        }else{
+            throw new CustomException("Order not found !!!");
+        }
+    }
 
 }

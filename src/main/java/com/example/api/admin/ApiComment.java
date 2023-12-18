@@ -13,6 +13,7 @@ import java.util.List;
 
 @RestController("commentOfAdmin")
 @RequestMapping("/api/admin")
+@CrossOrigin(origins = {"http://localhost:3000/","http://localhost:3001/"}, allowCredentials = "true")
 public class ApiComment {
     @Autowired
     private CommentServiceImpl commentService;

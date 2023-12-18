@@ -17,6 +17,8 @@ public class OrderResponse {
     private LocalDateTime orderDate;
     private LocalDateTime deliveryDate;
     private LocalDateTime receivingDate;
+    private LocalDateTime updateAtUser;
+    private String updateByUser;
     private String paymentMethod;
     private String statusOrder;
     private double transportFee;
@@ -27,11 +29,11 @@ public class OrderResponse {
     public OrderResponse() {
     }
 
-    public OrderResponse(Long id, String fullName, String email, String phoneNumber,
-                         String alternatePhone, String address, String ward, String district,
-                         String province, String notes, LocalDateTime orderDate, LocalDateTime deliveryDate,
-                         LocalDateTime receivingDate, String paymentMethod, String statusOrder, double transportFee,
-                         double totalPrice, String pay, List<OrderLineResponse> orderLines) {
+    public OrderResponse(Long id, String fullName, String email, String phoneNumber, String alternatePhone,
+                         String address, String ward, String district, String province, String notes, LocalDateTime orderDate,
+                         LocalDateTime deliveryDate, LocalDateTime receivingDate, LocalDateTime updateAtUser, String updateByUser,
+                         String paymentMethod, String statusOrder, double transportFee, double totalPrice, String pay,
+                         List<OrderLineResponse> orderLines) {
         this.id = id;
         this.fullName = fullName;
         this.email = email;
@@ -45,12 +47,30 @@ public class OrderResponse {
         this.orderDate = orderDate;
         this.deliveryDate = deliveryDate;
         this.receivingDate = receivingDate;
+        this.updateAtUser = updateAtUser;
+        this.updateByUser = updateByUser;
         this.paymentMethod = paymentMethod;
         this.statusOrder = statusOrder;
         this.transportFee = transportFee;
         this.totalPrice = totalPrice;
         this.pay = pay;
         this.orderLines = orderLines;
+    }
+
+    public LocalDateTime getUpdateAtUser() {
+        return updateAtUser;
+    }
+
+    public void setUpdateAtUser(LocalDateTime updateAtUser) {
+        this.updateAtUser = updateAtUser;
+    }
+
+    public String getUpdateByUser() {
+        return updateByUser;
+    }
+
+    public void setUpdateByUser(String updateByUser) {
+        this.updateByUser = updateByUser;
     }
 
     public String getPay() {

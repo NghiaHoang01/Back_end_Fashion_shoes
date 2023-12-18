@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController("roleOfAdmin")
 @RequestMapping("/api/admin")
+@CrossOrigin(origins = {"http://localhost:3000/","http://localhost:3001/"}, allowCredentials = "true")
 public class ApiRole {
     @Autowired
     private RoleServiceImpl roleService;

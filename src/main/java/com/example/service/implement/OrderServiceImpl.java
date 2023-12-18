@@ -5,12 +5,10 @@ import com.example.config.JwtProvider;
 import com.example.config.VNPayConfig;
 import com.example.constant.OrderConstant;
 import com.example.exception.CustomException;
-import com.example.repository.CartRepository;
-import com.example.repository.OrderLineRepository;
-import com.example.repository.OrderRepository;
-import com.example.repository.ProductRepository;
+import com.example.repository.*;
 import com.example.request.OrderProductQuantityRequest;
 import com.example.request.OrderRequest;
+import com.example.request.OrderUpdateRequest;
 import com.example.response.OrderLineResponse;
 import com.example.response.ListOrderResponse;
 import com.example.response.OrderResponse;
@@ -46,6 +44,8 @@ public class OrderServiceImpl implements OrderService {
     private ProductRepository productRepository;
     @Autowired
     private CartRepository cartRepository;
+    @Autowired
+    private VNPayRepository vnPayRepository;
 
     @Override
     @Transactional
@@ -196,7 +196,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public List<OrderResponse> getOrderResponses(List<Order> orders) {
+    public List<OrderResponse> getOrdersResponse(List<Order> orders) {
         List<OrderResponse> orderResponseList = new ArrayList<>();
 
         orders.forEach(order -> {
@@ -215,6 +215,8 @@ public class OrderServiceImpl implements OrderService {
             orderResponse.setNotes(order.getNote());
             orderResponse.setDeliveryDate(order.getDeliveryDate());
             orderResponse.setReceivingDate(order.getReceivingDate());
+            orderResponse.setUpdateAtUser(order.getUpdateAtUser());
+            orderResponse.setUpdateByUser(order.getUpdateByUser());
             orderResponse.setPaymentMethod(order.getPaymentMethod());
             orderResponse.setStatusOrder(order.getStatus());
             orderResponse.setTotalPrice(order.getTotalPrice());
@@ -260,7 +262,7 @@ public class OrderServiceImpl implements OrderService {
                 deliveryDateStart, deliveryDateEnd,
                 receivingDateStart, receivingDateEnd);
 
-        return getOrderResponses(ordersOfUser);
+        return getOrdersResponse(ordersOfUser);
     }
 
     @Override
@@ -279,10 +281,40 @@ public class OrderServiceImpl implements OrderService {
         int endIndex = Math.min(startIndex + pageable.getPageSize(), orderList.size());
 
         ListOrderResponse listOrderResponse = new ListOrderResponse();
-        listOrderResponse.setListOrders(getOrderResponses(orderList.subList(startIndex, endIndex)));
+        listOrderResponse.setListOrders(getOrdersResponse(orderList.subList(startIndex, endIndex)));
         listOrderResponse.setTotal((long) orderList.size());
 
         return listOrderResponse;
+    }
+
+    @Override
+    public OrderResponse getOrderDetail(Long orderId) throws CustomException {
+        Optional<Order> order = orderRepository.findById(orderId);
+        if (order.isPresent()) {
+            String token = jwtProvider.getTokenFromCookie(request);
+            User user = userService.findUserProfileByJwt(token);
+            if (user.getId().equals(order.get().getUser().getId())) {
+
+                OrderResponse orderResponse = new OrderResponse();
+
+                orderResponse.setId(order.get().getId());
+                orderResponse.setFullName(order.get().getFullName());
+                orderResponse.setPhoneNumber(order.get().getPhoneNumber());
+                orderResponse.setAlternatePhone(order.get().getAlternatePhoneNumber());
+                orderResponse.setAddress(order.get().getAddress());
+                orderResponse.setWard(order.get().getWard());
+                orderResponse.setDistrict(order.get().getDistrict());
+                orderResponse.setProvince(order.get().getProvince());
+                orderResponse.setNotes(order.get().getNote());
+
+                return orderResponse;
+
+            } else {
+                throw new CustomException("You do not have permission to see information of this order !!!");
+            }
+        } else {
+            throw new CustomException("Order not found !!!");
+        }
     }
 
     @Override
@@ -297,9 +329,14 @@ public class OrderServiceImpl implements OrderService {
             if (order.get().getStatus().equals(OrderConstant.ORDER_PENDING)) {
                 // Kiểm tra xem user có sở hữu đơn hàng này không
                 if (Objects.equals(user.getId(), order.get().getUser().getId())) {
+                    if (order.get().getPaymentMethod().equals("VNPAY")) {
+                        VNPayInformation vnPayInformation = vnPayRepository.findByOrderId(order.get().getId());
+
+                        vnPayRepository.delete(vnPayInformation);
+                    }
                     orderRepository.delete(order.get());
                 } else {
-                    throw new CustomException("You do not have permission to delete this order !!!");
+                    throw new CustomException("You do not have permission to cancel this order !!!");
                 }
             } else {
                 throw new CustomException("This order is on its way to you !!!");
@@ -316,6 +353,9 @@ public class OrderServiceImpl implements OrderService {
         Optional<Order> order = orderRepository.findById(id);
 
         if (order.isPresent()) {
+            String token = jwtProvider.getTokenFromCookie(request);
+            User admin = userService.findUserProfileByJwt(token);
+
             // cập nhật lại số lượng còn trong kho
             order.get().getOrderLines().forEach(orderLine -> {
                 Optional<Product> product = productRepository.findById(orderLine.getProduct().getId());
@@ -364,6 +404,7 @@ public class OrderServiceImpl implements OrderService {
             });
 
             order.get().setStatus(OrderConstant.ORDER_CONFIRMED);
+            order.get().setUpdateBy(admin.getEmail());
 
             orderRepository.save(order.get());
         } else {
@@ -377,8 +418,12 @@ public class OrderServiceImpl implements OrderService {
         Optional<Order> order = orderRepository.findById(id);
 
         if (order.isPresent()) {
+            String token = jwtProvider.getTokenFromCookie(request);
+            User admin = userService.findUserProfileByJwt(token);
+
             order.get().setStatus(OrderConstant.ORDER_SHIPPED);
             order.get().setDeliveryDate(LocalDateTime.now());
+            order.get().setUpdateBy(admin.getEmail());
 
             orderRepository.save(order.get());
         } else {
@@ -392,9 +437,13 @@ public class OrderServiceImpl implements OrderService {
         Optional<Order> order = orderRepository.findById(id);
 
         if (order.isPresent()) {
+            String token = jwtProvider.getTokenFromCookie(request);
+            User admin = userService.findUserProfileByJwt(token);
+
             order.get().setPay(OrderConstant.ORDER_PAID);
             order.get().setStatus(OrderConstant.ORDER_DELIVERED);
             order.get().setReceivingDate(LocalDateTime.now());
+            order.get().setUpdateBy(admin.getEmail());
 
             orderRepository.save(order.get());
         } else {
@@ -408,6 +457,11 @@ public class OrderServiceImpl implements OrderService {
         Optional<Order> order = orderRepository.findById(id);
 
         if (order.isPresent()) {
+            if (order.get().getPaymentMethod().equals("VNPAY")) {
+                VNPayInformation vnPayInformation = vnPayRepository.findByOrderId(order.get().getId());
+
+                vnPayRepository.delete(vnPayInformation);
+            }
             orderRepository.delete(order.get());
         } else {
             throw new CustomException("Not found order have id: " + id + " !!!");
@@ -418,12 +472,7 @@ public class OrderServiceImpl implements OrderService {
     @Transactional
     public void deleteSomeOrdersByAdmin(List<Long> listIdOrder) throws CustomException {
         for (Long id : listIdOrder) {
-            Optional<Order> order = orderRepository.findById(id);
-            if (order.isPresent()) {
-                orderRepository.delete(order.get());
-            } else {
-                throw new CustomException("Not found order have id " + id + " !!!");
-            }
+            deleteOrderByAdmin(id);
         }
     }
 
@@ -435,14 +484,41 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public void updatePayOfOrderVNPay(String vnp_ResponseCode, Long orderId) throws CustomException {
         Optional<Order> order = orderRepository.findById(orderId);
-        if(order.isPresent()){
-            if(vnp_ResponseCode.equals("00")){
+        if (order.isPresent()) {
+            if (vnp_ResponseCode.equals("00")) {
                 order.get().setPay(OrderConstant.ORDER_PAID);
-            }else{
+            } else {
                 order.get().setPay(OrderConstant.ORDER_UNPAID);
             }
             orderRepository.save(order.get());
-        }else{
+        } else {
+            throw new CustomException("Order not found !!!");
+        }
+    }
+
+    @Override
+    public void updateOrderByUser(Long orderId, OrderUpdateRequest orderUpdateRequest) throws CustomException {
+        Optional<Order> orderUpdate = orderRepository.findById(orderId);
+        if (orderUpdate.isPresent()) {
+            String token = jwtProvider.getTokenFromCookie(request);
+            User user = userService.findUserProfileByJwt(token);
+            if (orderUpdate.get().getUser().getId().equals(user.getId())) {
+                orderUpdate.get().setFullName(orderUpdateRequest.getFullName());
+                orderUpdate.get().setPhoneNumber(orderUpdateRequest.getPhoneNumber());
+                orderUpdate.get().setAlternatePhoneNumber(orderUpdateRequest.getAlternatePhone());
+                orderUpdate.get().setAddress(orderUpdateRequest.getAddress());
+                orderUpdate.get().setWard(orderUpdateRequest.getWard());
+                orderUpdate.get().setDistrict(orderUpdateRequest.getDistrict());
+                orderUpdate.get().setProvince(orderUpdateRequest.getProvince());
+                orderUpdate.get().setNote(orderUpdateRequest.getNotes());
+                orderUpdate.get().setUpdateAtUser(LocalDateTime.now());
+                orderUpdate.get().setUpdateByUser(user.getEmail());
+
+                orderRepository.save(orderUpdate.get());
+            } else {
+                throw new CustomException("You do not have permission to update this order !!!");
+            }
+        } else {
             throw new CustomException("Order not found !!!");
         }
     }

@@ -16,7 +16,7 @@ import java.util.List;
 
 @RestController("brandOfAdmin")
 @RequestMapping("/api/admin")
-@CrossOrigin(origins = "http://localhost:3000/", allowCredentials = "true")
+@CrossOrigin(origins = {"http://localhost:3000/","http://localhost:3001/"}, allowCredentials = "true")
 public class ApiBrand {
     @Autowired
     private BrandServiceImpl brandService;

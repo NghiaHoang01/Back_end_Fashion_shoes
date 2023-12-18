@@ -3,6 +3,7 @@ package com.example.service;
 import com.example.Entity.Order;
 import com.example.exception.CustomException;
 import com.example.request.OrderRequest;
+import com.example.request.OrderUpdateRequest;
 import com.example.response.ListOrderResponse;
 import com.example.response.OrderResponse;
 
@@ -12,7 +13,7 @@ import java.util.List;
 public interface OrderService {
     void placeOrderCOD(OrderRequest orderRequest) throws CustomException;
     String placeOrderVnPay(long totalPrice, String orderInfo, String orderId);
-    List<OrderResponse> getOrderResponses(List<Order> orders);
+    List<OrderResponse> getOrdersResponse(List<Order> orders);
 
     List<OrderResponse> getOrderDetailsByUser(String orderStatus,String paymentMethod,
                                               LocalDateTime orderDateStart, LocalDateTime orderDateEnd,
@@ -25,6 +26,7 @@ public interface OrderService {
                                                LocalDateTime deliveryDateStart, LocalDateTime deliveryDateEnd,
                                                LocalDateTime receivingDateStart, LocalDateTime receivingDateEnd,
                                                int pageIndex, int pageSize);
+    OrderResponse getOrderDetail(Long orderId) throws CustomException;
     void cancelOrderByUser(Long idOrder) throws CustomException;
 
     void markOrderShipped(Long id) throws CustomException;
@@ -39,4 +41,6 @@ public interface OrderService {
 
     long findOrderIdNewest();
     void updatePayOfOrderVNPay(String vnp_ResponseCode, Long orderId) throws CustomException;
+
+    void updateOrderByUser(Long orderId,OrderUpdateRequest orderUpdateRequest) throws CustomException;
 }

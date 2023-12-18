@@ -1,8 +1,10 @@
 package com.example.api.user;
 
+import com.example.Entity.Order;
 import com.example.Entity.VNPayInformation;
 import com.example.exception.CustomException;
 import com.example.request.OrderRequest;
+import com.example.request.OrderUpdateRequest;
 import com.example.response.OrderResponse;
 import com.example.response.Response;
 import com.example.response.ResponseData;
@@ -24,7 +26,7 @@ import java.util.List;
 
 @RestController("orderUser")
 @RequestMapping("/api/user")
-@CrossOrigin(origins = "http://localhost:3000/", allowCredentials = "true")
+@CrossOrigin(origins = {"http://localhost:3000/","http://localhost:3001/"}, allowCredentials = "true")
 public class ApiOrder {
     @Autowired
     private OrderService orderDetailService;
@@ -38,6 +40,7 @@ public class ApiOrder {
     @Autowired
     private VNPayService vnPayService;
 
+    // CALL SUCCESS
     @GetMapping("/order/newest")
     public ResponseEntity<?> getOrderIdNewest() {
         long id = orderDetailService.findOrderIdNewest();
@@ -45,8 +48,21 @@ public class ApiOrder {
     }
 
     // CALL SUCCESS
+    @GetMapping("/order/detail")
+    public ResponseEntity<?> getOrderDetailById(@RequestParam("id")Long orderId) throws CustomException {
+        OrderResponse orderResponse = orderDetailService.getOrderDetail(orderId);
+
+        ResponseData<OrderResponse> responseData = new ResponseData<>();
+        responseData.setResults(orderResponse);
+        responseData.setSuccess(true);
+        responseData.setMessage("Get order detail success !!!");
+
+        return new ResponseEntity<>(responseData, HttpStatus.OK);
+    }
+
+    // CALL SUCCESS
     @GetMapping("/orders/detail")
-    public ResponseEntity<?> getOrderDetail(@RequestParam(value = "orderStatus", required = false) String orderStatus,
+    public ResponseEntity<?> getOrdersDetail(@RequestParam(value = "orderStatus", required = false) String orderStatus,
                                             @RequestParam(value = "paymentMethod", required = false) String paymentMethod,
                                             @RequestParam(value = "orderDateStart", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime orderDateStart,
                                             @RequestParam(value = "orderDateEnd", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime orderDateEnd,
@@ -106,7 +122,20 @@ public class ApiOrder {
     }
 
     // CALL SUCCESS
-    @GetMapping("/vnpay-response")
+    @PutMapping("/order")
+    public ResponseEntity<?> updateOrderByUser(@RequestParam("id")Long orderId,
+                                               @RequestBody OrderUpdateRequest orderUpdateRequest) throws CustomException {
+        orderDetailService.updateOrderByUser(orderId,orderUpdateRequest);
+
+        Response response = new Response();
+        response.setSuccess(true);
+        response.setMessage("Update order success !!!");
+
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    // CALL SUCCESS
+    @GetMapping("/order/vnpay")
     public ResponseEntity<?> vnPayResponse() throws IOException, CustomException {
         VNPayResponse vnPayResponse = new VNPayResponse();
         vnPayResponse.setVnp_Amount(request.getParameter("vnp_Amount"));
@@ -122,25 +151,15 @@ public class ApiOrder {
 
         vnPayService.createVNPayOfOrder(vnPayResponse, Long.valueOf(orderId));
 
+        orderDetailService.updatePayOfOrderVNPay(vnPayResponse.getVnp_ResponseCode(), Long.valueOf(orderId));
+
         response.sendRedirect("http://localhost:3000/vnpay-response/" + orderId);
+
         return ResponseEntity.ok().body("VNPay response !!!");
     }
 
     // CALL SUCCESS
-    @PutMapping("/order/pay")
-    public ResponseEntity<?> updatePayOfOrderVNPay(@RequestParam("vnp_ResponseCode") String vnp_ResponseCode,
-                                                   @RequestParam("id")Long orderId) throws CustomException {
-        orderDetailService.updatePayOfOrderVNPay(vnp_ResponseCode,orderId);
-
-        Response response = new Response();
-        response.setSuccess(true);
-        response.setMessage("Update pay of order success !!!");
-
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
-
-    // CALL SUCCESS
-    @GetMapping("/vnpay/information")
+    @GetMapping("/order/vnpay/information")
     public ResponseEntity<?> getVNPayInformationByOrderId(@RequestParam("orderId") Long orderId){
         VNPayInformation vnPayInformation = vnPayService.getVNPayInformationByOrderId(orderId);
 

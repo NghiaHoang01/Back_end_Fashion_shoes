@@ -13,6 +13,7 @@ import java.util.List;
 
 @RestController("admin")
 @RequestMapping("/api/admin")
+@CrossOrigin(origins = {"http://localhost:3000/","http://localhost:3001/"}, allowCredentials = "true")
 public class ApiUser {
     @Autowired
     private UserServiceImpl userService;

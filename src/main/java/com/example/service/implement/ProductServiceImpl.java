@@ -160,15 +160,10 @@ public class ProductServiceImpl implements ProductService {
     @Transactional
     public void deleteSomeProducts(List<Long> listIdProducts) throws CustomException {
         listIdProducts.forEach(id -> {
-            Optional<Product> product = productRepository.findById(id);
-            if (product.isPresent()) {
-                productRepository.delete(product.get());
-            } else {
-                try {
-                    throw new CustomException("Product not found with id: " + id);
-                } catch (CustomException e) {
-                    throw new RuntimeException(e);
-                }
+            try {
+                deleteProduct(id);
+            } catch (CustomException e) {
+                throw new RuntimeException(e);
             }
         });
     }
@@ -229,40 +224,6 @@ public class ProductServiceImpl implements ProductService {
     }
 
     // not test
-    @Override
-    public List<Product> findProductByBrand(String brand, int pageIndex, int pageSize) throws CustomException {
-        Pageable pageable = PageRequest.of(pageIndex - 1, pageSize);
-
-        List<Product> products = productRepository.getAllProductByBrandName(brand);
-        int startIndex = (int) pageable.getOffset();
-        int endIndex = Math.min(startIndex + pageable.getPageSize(), products.size());
-
-        return products.subList(startIndex, endIndex);
-    }
-
-    @Override
-    public List<Product> findProductByParentCategory(String brand, String parentCategory, int pageIndex, int pageSize) throws CustomException {
-        Pageable pageable = PageRequest.of(pageIndex - 1, pageSize);
-
-        List<Product> products = productRepository.getAllProductByParentCategory(brand, parentCategory);
-
-        int startIndex = (int) pageable.getOffset();
-        int endIndex = Math.min(startIndex + pageable.getPageSize(), products.size());
-
-        return products.subList(startIndex, endIndex);
-    }
-
-    @Override
-    public List<Product> findProductByChildCategory(String brand, String parentCategory, String childCategory, int pageIndex, int pageSize) throws CustomException {
-        Pageable pageable = PageRequest.of(pageIndex - 1, pageSize);
-
-        List<Product> products = productRepository.getAllProductByChildCategory(brand, parentCategory, childCategory);
-
-        int startIndex = (int) pageable.getOffset();
-        int endIndex = Math.min(startIndex + pageable.getPageSize(), products.size());
-
-        return products.subList(startIndex, endIndex);
-    }
 
     @Override
     public ProductResponse filterProduct(String name, Long brandId, Long parentCategoryId, Long childCategoryId, String color,
@@ -305,47 +266,6 @@ public class ProductServiceImpl implements ProductService {
         return product.orElseThrow(() -> new CustomException("Product not found with id: " + id));
     }
 
-    // no test
-
-    @Override
-    public List<Product> getAllProductBySearch(String search, int pageIndex, int pageSize) {
-//        if ((search.equals(""))) {
-//            return getAllProduct(pageIndex, pageSize);
-//        } else {
-//            Pageable pageable = PageRequest.of(pageIndex - 1, pageSize);
-//
-//            List<Product> products = productRepository.getAllProductBySearch(search);
-//
-//            int startIndex = (int) pageable.getOffset();
-//            int endIndex = Math.min(startIndex + pageable.getPageSize(), products.size());
-//
-//            return products.subList(startIndex, endIndex);
-//        }
-        return null;
-    }
-
-
-
-    @Override
-    public int countProductByBrand(String brandName) {
-        return productRepository.countProductByBrandName(brandName);
-    }
-
-    @Override
-    public int countProductByBrandAndParentCategory(String brandName, String parentCategory) {
-        return productRepository.countProductByBrandNameAndParentCategory(brandName, parentCategory);
-    }
-
-    @Override
-    public Long countAllProducts() {
-        return (Long) productRepository.count();
-    }
-
-    @Override
-    public int countProductBySearch(String search) {
-        return productRepository.countProductBySearch(search);
-    }
-
     @Override
     public String getMainImageBas64(Long idProduct) throws CustomException {
         return productRepository.getMainImageBase64(idProduct);
@@ -354,12 +274,5 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public List<String> getSecondaryImagesBase64(Long idProduct) throws CustomException {
         return productRepository.getSecondaryImagesBase64(idProduct);
-    }
-
-
-
-    @Override
-    public Product getLastProduct() {
-        return productRepository.findTop1ByOrderByIdDesc();
     }
 }

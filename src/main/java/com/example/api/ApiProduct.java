@@ -13,7 +13,7 @@ import java.util.List;
 
 @RestController("products")
 @RequestMapping("/api")
-@CrossOrigin(origins = "http://localhost:3000/", allowCredentials = "true")
+@CrossOrigin(origins = {"http://localhost:3000/","http://localhost:3001/"}, allowCredentials = "true")
 public class ApiProduct {
 
     @Autowired
@@ -134,34 +134,5 @@ public class ApiProduct {
         responseData.setResults(productResponse);
 
         return new ResponseEntity<>(responseData, HttpStatus.OK);
-    }
-
-    // not test
-    @GetMapping("/product/brand")
-    public ResponseEntity<?> getProductByBrandName(@RequestParam("brand") String brandName, @RequestParam("pageIndex") int pageIndex,
-                                                   @RequestParam("pageSize") int pageSize) throws CustomException {
-        return new ResponseEntity<>(productService.findProductByBrand(brandName, pageIndex, pageSize), HttpStatus.OK);
-    }
-
-    @GetMapping("/product/parentCategory")
-    public ResponseEntity<?> getProductByParentCategory(@RequestParam("brand") String brandName, @RequestParam("parentCategory") String parentCategory,
-                                                        @RequestParam("pageIndex") int pageIndex,
-                                                        @RequestParam("pageSize") int pageSize) throws CustomException {
-        return new ResponseEntity<>(productService.findProductByParentCategory(brandName, parentCategory, pageIndex, pageSize), HttpStatus.OK);
-    }
-
-    @GetMapping("/product/childCategory")
-    public ResponseEntity<?> getProductByChildCategory(@RequestParam("brand") String brandName, @RequestParam("parentCategory") String parentCategory,
-                                                       @RequestParam("childCategory") String childCategory,
-                                                       @RequestParam("pageIndex") int pageIndex,
-                                                       @RequestParam("pageSize") int pageSize) throws CustomException {
-        return new ResponseEntity<>(productService.findProductByChildCategory(brandName, parentCategory, childCategory, pageIndex, pageSize), HttpStatus.OK);
-    }
-
-
-
-    @GetMapping("/product/search")
-    public ResponseEntity<?> getAllProductBySearch(@RequestParam("search") String search, @RequestParam("pageIndex") int pageIndex, @RequestParam("pageSize") int pageSize) {
-        return new ResponseEntity<>(productService.getAllProductBySearch(search, pageIndex, pageSize), HttpStatus.OK);
     }
 }

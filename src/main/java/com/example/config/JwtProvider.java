@@ -24,7 +24,7 @@ public class JwtProvider {
     public String generateToken(User user) {
         return Jwts.builder()
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(new Date().getTime() + 300000L))
+                .setExpiration(new Date(new Date().getTime() + 600000L))
                 .claim("email", user.getEmail())
                 .signWith(key(), SignatureAlgorithm.HS256).compact();
     }
@@ -34,7 +34,7 @@ public class JwtProvider {
 
         return ResponseCookie.from(CookieConstant.JWT_COOKIE, token)
                 .path("/api")
-                .maxAge(5*60)
+                .maxAge(10*60)
                 .httpOnly(true).secure(true).build();
     }
 

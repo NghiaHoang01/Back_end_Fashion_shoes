@@ -42,30 +42,4 @@ public interface ProductService {
     Long getTheHighestPriceOfProduct();
 
     ProductResponse getSimilarProductsByBrandId(Long brandId,Long productId);
-
-    // Not test
-
-    List<Product> findProductByBrand(String brand, int pageIndex, int pageSize) throws CustomException;
-
-    List<Product> findProductByParentCategory(String brand, String parentCategory, int pageIndex, int pageSize) throws CustomException;
-
-    List<Product> findProductByChildCategory(String brand, String parentCategory, String childCategory, int pageIndex, int pageSize) throws CustomException;
-
-
-
-    List<Product> getAllProductBySearch(String search,int pageIndex,int pageSize);
-
-
-    Product getLastProduct();
-
-    int countProductByBrand(String brandName);
-
-    int countProductByBrandAndParentCategory(String brandName, String parentCategory);
-
-    Long countAllProducts();
-
-    int countProductBySearch(String search);
-
-
-
 }

@@ -40,6 +40,12 @@ public class Order extends BaseEntity {
     @Column(name = "transport_fee")
     private double transportFee;
 
+    @Column(name = "update_by_user")
+    private String updateByUser;
+
+    @Column(name = "update_at_user")
+    private LocalDateTime updateAtUser;
+
     @Column(name = "order_date")
     private LocalDateTime orderDate;
 
@@ -214,10 +220,27 @@ public class Order extends BaseEntity {
         this.pay = pay;
     }
 
-    public Order(String fullName, String phoneNumber, String alternatePhoneNumber,
-                 String address, String province, String district, String ward, double totalPrice,
-                 String status, double transportFee, LocalDateTime orderDate, LocalDateTime deliveryDate,
-                 LocalDateTime receivingDate, String pay, String note, String paymentMethod, User user, Set<OrderLine> orderLines) {
+    public String getUpdateByUser() {
+        return updateByUser;
+    }
+
+    public void setUpdateByUser(String updateByUser) {
+        this.updateByUser = updateByUser;
+    }
+
+    public LocalDateTime getUpdateAtUser() {
+        return updateAtUser;
+    }
+
+    public void setUpdateAtUser(LocalDateTime updateAtUser) {
+        this.updateAtUser = updateAtUser;
+    }
+
+    public Order(String fullName, String phoneNumber, String alternatePhoneNumber, String address,
+                 String province, String district, String ward, double totalPrice, String status,
+                 double transportFee, String updateByUser, LocalDateTime updateAtUser, LocalDateTime orderDate,
+                 LocalDateTime deliveryDate, LocalDateTime receivingDate, String pay, String note, String paymentMethod,
+                 User user, Set<OrderLine> orderLines) {
         this.fullName = fullName;
         this.phoneNumber = phoneNumber;
         this.alternatePhoneNumber = alternatePhoneNumber;
@@ -228,6 +251,8 @@ public class Order extends BaseEntity {
         this.totalPrice = totalPrice;
         this.status = status;
         this.transportFee = transportFee;
+        this.updateByUser = updateByUser;
+        this.updateAtUser = updateAtUser;
         this.orderDate = orderDate;
         this.deliveryDate = deliveryDate;
         this.receivingDate = receivingDate;

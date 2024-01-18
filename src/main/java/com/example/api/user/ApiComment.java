@@ -16,7 +16,7 @@ import java.io.IOException;
 
 @RestController("commentOfUser")
 @RequestMapping("/api/user")
-@CrossOrigin(origins = {"http://localhost:3000/","http://localhost:3001/","https://front-end-fasion-shoes.vercel.app/"}, allowCredentials = "true")
+@CrossOrigin(origins = {"http://localhost:3000/","http://localhost:3001/","https://fashion-shoes.vercel.app/"}, allowCredentials = "true")
 public class ApiComment {
     @Autowired
     private CommentServiceImpl commentService;

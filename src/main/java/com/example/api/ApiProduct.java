@@ -13,7 +13,7 @@ import java.util.List;
 
 @RestController("products")
 @RequestMapping("/api")
-@CrossOrigin(origins = {"http://localhost:3000/","http://localhost:3001/","https://front-end-fasion-shoes.vercel.app/"}, allowCredentials = "true")
+@CrossOrigin(origins = {"http://localhost:3000/","http://localhost:3001/","https://fashion-shoes.vercel.app/"}, allowCredentials = "true")
 public class ApiProduct {
 
     @Autowired

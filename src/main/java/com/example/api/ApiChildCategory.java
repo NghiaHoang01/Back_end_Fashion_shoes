@@ -12,7 +12,7 @@ import java.util.List;
 
 @RestController("childCategory")
 @RequestMapping("/api")
-@CrossOrigin(origins = {"http://localhost:3000/","http://localhost:3001/"}, allowCredentials = "true")
+@CrossOrigin(origins = {"http://localhost:3000/","http://localhost:3001/","https://front-end-fasion-shoes.vercel.app/"}, allowCredentials = "true")
 public class ApiChildCategory {
     @Autowired
     private ChildCategoryServiceImpl childCategoryService;

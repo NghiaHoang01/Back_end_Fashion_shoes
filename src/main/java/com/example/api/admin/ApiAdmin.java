@@ -19,7 +19,7 @@ import java.util.Objects;
 
 @RestController("authOfAdmin")
 @RequestMapping("/api/admin")
-@CrossOrigin(origins = {"http://localhost:3000/","http://localhost:3001/"}, allowCredentials = "true")
+@CrossOrigin(origins = {"http://localhost:3000/","http://localhost:3001/","https://front-end-fasion-shoes.vercel.app/"}, allowCredentials = "true")
 public class ApiAdmin {
     @Autowired
     private UserServiceImpl userService;

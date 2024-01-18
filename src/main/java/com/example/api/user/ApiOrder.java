@@ -26,7 +26,7 @@ import java.util.List;
 
 @RestController("orderUser")
 @RequestMapping("/api/user")
-@CrossOrigin(origins = {"http://localhost:3000/","http://localhost:3001/"}, allowCredentials = "true")
+@CrossOrigin(origins = {"http://localhost:3000/","http://localhost:3001/","https://front-end-fasion-shoes.vercel.app/"}, allowCredentials = "true")
 public class ApiOrder {
     @Autowired
     private OrderService orderDetailService;

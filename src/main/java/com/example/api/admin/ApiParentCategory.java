@@ -15,7 +15,7 @@ import java.util.List;
 
 @RestController("parentCategoryRoleAdmin")
 @RequestMapping("/api/admin")
-@CrossOrigin(origins = {"http://localhost:3000/","http://localhost:3001/","https://fashion-shoes.vercel.app/"}, allowCredentials = "true")
+//@CrossOrigin(origins = {"http://localhost:3000/","http://localhost:3001/","https://fashion-shoes.vercel.app/"}, allowCredentials = "true")
 public class ApiParentCategory {
     @Autowired
     private ParentCategoryServiceImpl parentCategoryService;

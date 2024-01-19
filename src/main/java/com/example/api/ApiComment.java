@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController("comment")
 @RequestMapping("/api")
-@CrossOrigin(origins = {"http://localhost:3000/","http://localhost:3001/","https://fashion-shoes.vercel.app/"}, allowCredentials = "true")
+//@CrossOrigin(origins = {"http://localhost:3000/","http://localhost:3001/","https://fashion-shoes.vercel.app/"}, allowCredentials = "true")
 public class ApiComment {
     @Autowired
     private CommentServiceImpl commentService;

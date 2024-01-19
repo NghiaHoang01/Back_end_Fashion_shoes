@@ -16,7 +16,7 @@ import java.util.List;
 
 @RestController("orderOfRoleAdmin")
 @RequestMapping("/api/admin")
-@CrossOrigin(origins = {"http://localhost:3000/","http://localhost:3001/","https://fashion-shoes.vercel.app/"}, allowCredentials = "true")
+//@CrossOrigin(origins = {"http://localhost:3000/","http://localhost:3001/","https://fashion-shoes.vercel.app/"}, allowCredentials = "true")
 public class ApiOrder {
     @Autowired
     private OrderService orderDetailService;

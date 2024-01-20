@@ -38,14 +38,14 @@ public class AppConfig {
                 .authorizeHttpRequests((Authorize) -> Authorize
                         .requestMatchers("/api/user/**").authenticated()
                         .requestMatchers("/admin/**").hasAuthority(RoleConstant.ADMIN)
-                        .requestMatchers(HttpMethod.GET,"/api/admin/**").hasAuthority(RoleConstant.ADMIN)
-                        .requestMatchers(HttpMethod.POST,"/api/admin/**").hasAuthority(RoleConstant.ADMIN)
-                        .requestMatchers(HttpMethod.DELETE,"/api/admin/**").hasAuthority(RoleConstant.ADMIN)
-                        .requestMatchers(HttpMethod.PUT,"/api/admin/**").hasAuthority(RoleConstant.ADMIN)
-                        .requestMatchers(HttpMethod.HEAD,"/api/admin/**").hasAuthority(RoleConstant.ADMIN)
-                        .requestMatchers(HttpMethod.OPTIONS,"/api/admin/**").hasAuthority(RoleConstant.ADMIN)
-                        .requestMatchers(HttpMethod.PATCH,"/api/admin/**").hasAuthority(RoleConstant.ADMIN)
-                        .requestMatchers(HttpMethod.TRACE,"/api/admin/**").hasAuthority(RoleConstant.ADMIN)
+                        .requestMatchers(HttpMethod.GET,"**/api/admin/**").hasAuthority(RoleConstant.ADMIN)
+                        .requestMatchers(HttpMethod.POST,"**/api/admin/**").hasAuthority(RoleConstant.ADMIN)
+                        .requestMatchers(HttpMethod.DELETE,"**/api/admin/**").hasAuthority(RoleConstant.ADMIN)
+                        .requestMatchers(HttpMethod.PUT,"**/api/admin/**").hasAuthority(RoleConstant.ADMIN)
+                        .requestMatchers(HttpMethod.HEAD,"**/api/admin/**").hasAuthority(RoleConstant.ADMIN)
+                        .requestMatchers(HttpMethod.OPTIONS,"**/api/admin/**").hasAuthority(RoleConstant.ADMIN)
+                        .requestMatchers(HttpMethod.PATCH,"**/api/admin/**").hasAuthority(RoleConstant.ADMIN)
+                        .requestMatchers(HttpMethod.TRACE,"**/api/admin/**").hasAuthority(RoleConstant.ADMIN)
                         .anyRequest().permitAll())
                 .addFilterBefore(jwtValidator, UsernamePasswordAuthenticationFilter.class);
 

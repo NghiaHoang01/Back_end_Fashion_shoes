@@ -38,23 +38,21 @@ public class JwtProvider {
         String token = generateToken(user);
 
         return ResponseCookie.from(CookieConstant.JWT_COOKIE, token)
-                .domain("backendfashionshoes-production.up.railway.app")
-                .path("/api")
+//                .domain("backendfashionshoes-production.up.railway.app")
+                .path("/")
                 .maxAge(10*60)
                 .httpOnly(true)
-                .secure(true)
-//                .sameSite("None")
+                .secure(false)
                 .build();
     }
 
     public ResponseCookie generateRefreshTokenCodeCookie(String refreshTokenCode) {
         return ResponseCookie.from(CookieConstant.JWT_REFRESH_CODE_COOKIE, refreshTokenCode)
-                .domain("backendfashionshoes-production.up.railway.app")
-                .path("/api")
+//                .domain("backendfashionshoes-production.up.railway.app")
+                .path("/")
                 .maxAge(24 * 60 * 60 * 10)
                 .httpOnly(true)
-                .secure(true)
-//                .sameSite("None")
+                .secure(false)
                 .build();
     }
 

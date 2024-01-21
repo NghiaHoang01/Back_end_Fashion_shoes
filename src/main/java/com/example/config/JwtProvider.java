@@ -33,12 +33,11 @@ public class JwtProvider {
         String token = generateToken(user);
 
         return ResponseCookie.from(CookieConstant.JWT_COOKIE, token)
-//                .domain()
                 .path("/api")
                 .maxAge(10*60)
-                .httpOnly(false)
-                .secure(false)
-                .sameSite("Lax")
+                .httpOnly(true)
+//                .secure(false)
+//                .sameSite("None")
                 .build();
     }
 
@@ -46,9 +45,9 @@ public class JwtProvider {
         return ResponseCookie.from(CookieConstant.JWT_REFRESH_CODE_COOKIE, refreshTokenCode)
                 .path("/api")
                 .maxAge(24 * 60 * 60 * 10)
-                .httpOnly(false)
-                .secure(false)
-                .sameSite("Lax")
+                .httpOnly(true)
+//                .secure(false)
+//                .sameSite("None")
                 .build();
     }
 

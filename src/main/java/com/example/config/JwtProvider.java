@@ -37,22 +37,23 @@ public class JwtProvider {
     public ResponseCookie generateTokenCookie(User user) {
         String token = generateToken(user);
 
-        response.addHeader("Test-Cookie", "AAA");
         return ResponseCookie.from(CookieConstant.JWT_COOKIE, token)
+                .domain("backendfashionshoes-production.up.railway.app")
                 .path("/api")
                 .maxAge(10*60)
                 .httpOnly(true)
-//                .secure(false)
+                .secure(true)
 //                .sameSite("None")
                 .build();
     }
 
     public ResponseCookie generateRefreshTokenCodeCookie(String refreshTokenCode) {
         return ResponseCookie.from(CookieConstant.JWT_REFRESH_CODE_COOKIE, refreshTokenCode)
+                .domain("backendfashionshoes-production.up.railway.app")
                 .path("/api")
                 .maxAge(24 * 60 * 60 * 10)
                 .httpOnly(true)
-//                .secure(false)
+                .secure(true)
 //                .sameSite("None")
                 .build();
     }

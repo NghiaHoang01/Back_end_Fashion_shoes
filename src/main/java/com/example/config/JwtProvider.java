@@ -38,21 +38,21 @@ public class JwtProvider {
         String token = generateToken(user);
 
         return ResponseCookie.from(CookieConstant.JWT_COOKIE, token)
-//                .domain("backendfashionshoes-production.up.railway.app")
                 .path("/")
                 .maxAge(10*60)
                 .httpOnly(true)
                 .secure(false)
+                .sameSite("None")
                 .build();
     }
 
     public ResponseCookie generateRefreshTokenCodeCookie(String refreshTokenCode) {
         return ResponseCookie.from(CookieConstant.JWT_REFRESH_CODE_COOKIE, refreshTokenCode)
-//                .domain("backendfashionshoes-production.up.railway.app")
                 .path("/")
                 .maxAge(24 * 60 * 60 * 10)
                 .httpOnly(true)
                 .secure(false)
+                .sameSite("None")
                 .build();
     }
 
@@ -76,11 +76,11 @@ public class JwtProvider {
     }
 
     public ResponseCookie cleanTokenCookie() {
-        return ResponseCookie.from(CookieConstant.JWT_COOKIE, "").path("/api").maxAge(0).build();
+        return ResponseCookie.from(CookieConstant.JWT_COOKIE, "").path("/").maxAge(0).build();
     }
 
     public ResponseCookie cleanRefreshTokenCodeCookie(){
-        return ResponseCookie.from(CookieConstant.JWT_REFRESH_CODE_COOKIE, "").path("/api").maxAge(0).build();
+        return ResponseCookie.from(CookieConstant.JWT_REFRESH_CODE_COOKIE, "").path("/").maxAge(0).build();
     }
 
     public boolean validateJwtToken(String token) {

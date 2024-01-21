@@ -8,6 +8,8 @@ import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Component;
 import org.springframework.web.util.WebUtils;
@@ -17,6 +19,9 @@ import java.util.Date;
 
 @Component
 public class JwtProvider {
+    @Autowired
+    private HttpServletResponse response;
+
     private Key key() {
         return Keys.hmacShaKeyFor(Decoders.BASE64.decode(JwtConstant.SECRET_KEY));
     }
@@ -32,6 +37,7 @@ public class JwtProvider {
     public ResponseCookie generateTokenCookie(User user) {
         String token = generateToken(user);
 
+        response.addHeader("Test-Cookie", "AAA");
         return ResponseCookie.from(CookieConstant.JWT_COOKIE, token)
                 .path("/api")
                 .maxAge(10*60)

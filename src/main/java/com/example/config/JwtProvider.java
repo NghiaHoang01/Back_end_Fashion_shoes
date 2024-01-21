@@ -38,6 +38,7 @@ public class JwtProvider {
         String token = generateToken(user);
 
         return ResponseCookie.from(CookieConstant.JWT_COOKIE, token)
+                .domain(".railway.app")
                 .path("/")
                 .maxAge(10*60)
                 .httpOnly(true)
@@ -48,6 +49,7 @@ public class JwtProvider {
 
     public ResponseCookie generateRefreshTokenCodeCookie(String refreshTokenCode) {
         return ResponseCookie.from(CookieConstant.JWT_REFRESH_CODE_COOKIE, refreshTokenCode)
+                .domain(".railway.app")
                 .path("/")
                 .maxAge(24 * 60 * 60 * 10)
                 .httpOnly(true)

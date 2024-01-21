@@ -15,7 +15,7 @@ import java.util.List;
 
 @RestController("cartOfUser")
 @RequestMapping("/api/user")
-@CrossOrigin(origins = {"http://localhost:3000/","http://localhost:3001/","https://fashion-shoes.vercel.app/"}, allowCredentials = "true")
+//@CrossOrigin(origins = {"http://localhost:3000/","http://localhost:3001/","https://fashion-shoes.vercel.app/"}, allowCredentials = "true")
 public class ApiCart {
     @Autowired
     private CartService cartService;

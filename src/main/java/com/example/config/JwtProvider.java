@@ -42,7 +42,7 @@ public class JwtProvider {
                 .path("/")
                 .maxAge(10*60)
                 .httpOnly(true)
-                .secure(false)
+                .secure(true)
                 .sameSite("None")
                 .build();
     }
@@ -53,7 +53,7 @@ public class JwtProvider {
                 .path("/")
                 .maxAge(24 * 60 * 60 * 10)
                 .httpOnly(true)
-                .secure(false)
+                .secure(true)
                 .sameSite("None")
                 .build();
     }

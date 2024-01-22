@@ -19,8 +19,6 @@ import java.util.Date;
 
 @Component
 public class JwtProvider {
-    @Autowired
-    private HttpServletResponse response;
 
     private Key key() {
         return Keys.hmacShaKeyFor(Decoders.BASE64.decode(JwtConstant.SECRET_KEY));

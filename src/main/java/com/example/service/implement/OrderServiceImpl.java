@@ -141,7 +141,6 @@ public class OrderServiceImpl implements OrderService {
         vnp_Params.put("vnp_TmnCode", vnp_TmnCode);
         vnp_Params.put("vnp_Amount", String.valueOf(totalPrice * 100));
         vnp_Params.put("vnp_CurrCode", "VND");
-
         vnp_Params.put("vnp_TxnRef", vnp_TxnRef);
         vnp_Params.put("vnp_OrderInfo", orderInfo + "-" + orderId);
         vnp_Params.put("vnp_OrderType", VNPayConfig.orderType);
@@ -152,7 +151,14 @@ public class OrderServiceImpl implements OrderService {
         vnp_Params.put("vnp_ReturnUrl", VNPayConfig.vnp_ReturnUrl);
         vnp_Params.put("vnp_IpAddr", VNPayConfig.vnp_IpAddr);
 
-        Calendar cld = Calendar.getInstance(TimeZone.getTimeZone("Etc/GMT+7"));
+        // chạy localhost
+//        Calendar cld = Calendar.getInstance(TimeZone.getTimeZone("Etc/GMT+7"));
+//        SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
+//        String vnp_CreateDate = formatter.format(cld.getTime());
+//        vnp_Params.put("vnp_CreateDate", vnp_CreateDate);
+
+        // chạy trên railway giờ London
+        Calendar cld = Calendar.getInstance(TimeZone.getTimeZone("Europe/London"));
         SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
         String vnp_CreateDate = formatter.format(cld.getTime());
         vnp_Params.put("vnp_CreateDate", vnp_CreateDate);

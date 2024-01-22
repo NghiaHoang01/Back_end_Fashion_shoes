@@ -95,6 +95,7 @@ public class ApiOrder {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    //CALL SUCCESS
     @DeleteMapping("/orders/{listIdOrders}")
     public ResponseEntity<?> deleteSomeOrders(@PathVariable List<Long> listIdOrders) throws CustomException {
         orderDetailService.deleteSomeOrdersByAdmin(listIdOrders);

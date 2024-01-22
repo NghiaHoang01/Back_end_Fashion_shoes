@@ -153,7 +153,9 @@ public class ApiOrder {
 
         orderDetailService.updatePayOfOrderVNPay(vnPayResponse.getVnp_ResponseCode(), Long.valueOf(orderId));
 
-        response.sendRedirect("http://localhost:3000/vnpay-response/" + orderId);
+//        response.sendRedirect("http://localhost:3000/vnpay-response/" + orderId);
+        response.sendRedirect("https://fashion-shoes.vercel.app/vnpay-response/" + orderId);
+
 
         return ResponseEntity.ok().body("VNPay response !!!");
     }

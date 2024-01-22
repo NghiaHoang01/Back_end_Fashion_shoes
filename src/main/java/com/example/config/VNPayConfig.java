@@ -12,10 +12,11 @@ import java.util.*;
 
 public class VNPayConfig {
     public static String vnp_PayUrl = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
-    public static String vnp_ReturnUrl = "http://localhost:8080/api/user/order/vnpay";
+//    public static String vnp_ReturnUrl = "http://localhost:8080/api/user/order/vnpay";
+    public static String vnp_ReturnUrl = "https://backendfashionshoes-production.up.railway.app/api/user/order/vnpay";
+
     public static String vnp_TmnCode = "UV3WGIAJ";
     public static String vnp_HashSecret = "KJJDNWYIPYOFSORMZUUIISGNKPZNHHQL";
-    public static String vnp_apiUrl = "https://sandbox.vnpayment.vn/merchant_webapi/api/transaction";
     public static String vnp_Version = "2.1.0";
     public static String vnp_Command = "pay";
     public static String vnp_IpAddr = "127.0.0.1";

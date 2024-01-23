@@ -163,7 +163,8 @@ public class OrderServiceImpl implements OrderService {
         String vnp_CreateDate = formatter.format(cld.getTime());
         vnp_Params.put("vnp_CreateDate", vnp_CreateDate);
 
-        cld.add(Calendar.MINUTE, 2880);
+        // do lệch múi giờ ở phần domain là 7 tiếng (giờ ở Lodon với giờ ở Việt Nam) nên phải set up vnp_ExpireDate có thời gian là 8 tiếng
+        cld.add(Calendar.MINUTE, 480);
         String vnp_ExpireDate = formatter.format(cld.getTime());
         vnp_Params.put("vnp_ExpireDate", vnp_ExpireDate);
 

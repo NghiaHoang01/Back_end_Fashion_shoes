@@ -18,9 +18,13 @@ public class EmailUtil {
     private JavaMailSender javaMailSender;
 
     public ResponseCookie generateEmailCookie(String email) {
-        return ResponseCookie.from(CookieConstant.EMAIL_COOKIE, email).path("/api")
+        return ResponseCookie.from(CookieConstant.EMAIL_COOKIE, email)
+                .domain(".railway.app")
+                .path("/")
                 .maxAge(10 * 60)
-                .httpOnly(true).secure(true)
+                .httpOnly(true)
+                .secure(true)
+                .sameSite("None")
                 .build();
     }
 
@@ -33,7 +37,7 @@ public class EmailUtil {
     }
 
     public ResponseCookie cleanEmailCookie() {
-        return ResponseCookie.from(CookieConstant.EMAIL_COOKIE, "").path("/api").maxAge(0).build();
+        return ResponseCookie.from(CookieConstant.EMAIL_COOKIE, "").path("/").maxAge(0).build();
     }
 
     public void sendOtpEmail(String email, String otp) throws MessagingException {

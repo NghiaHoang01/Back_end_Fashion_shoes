@@ -25,9 +25,12 @@ public class OTPUtil {
 
     public ResponseCookie generateOtpCookie(String otp) {
         return ResponseCookie.from(CookieConstant.OTP_COOKIE, otp)
-                .path("/api")
+                .domain(".railway.app")
+                .path("/")
                 .maxAge(10 * 60)
-                .httpOnly(true).secure(true)
+                .httpOnly(true)
+                .secure(true)
+                .sameSite("None")
                 .build();
     }
 
@@ -41,6 +44,6 @@ public class OTPUtil {
     }
 
     public ResponseCookie cleanOtpCookie() {
-        return ResponseCookie.from(CookieConstant.OTP_COOKIE, "").path("/api").maxAge(0).build();
+        return ResponseCookie.from(CookieConstant.OTP_COOKIE, "").path("/").maxAge(0).build();
     }
 }

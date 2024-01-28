@@ -76,11 +76,19 @@ public class JwtProvider {
     }
 
     public ResponseCookie cleanTokenCookie(String name) {
-        return ResponseCookie.from(name, "").path("/").maxAge(0).build();
+        return ResponseCookie.from(name, "")
+                .domain(".railway.app")
+                .path("/")
+                .maxAge(0)
+                .build();
     }
 
     public ResponseCookie cleanRefreshTokenCodeCookie(String name){
-        return ResponseCookie.from(name, "").path("/").maxAge(0).build();
+        return ResponseCookie.from(name, "")
+                .domain(".railway.app")
+                .path("/")
+                .maxAge(0)
+                .build();
     }
 
     public boolean validateJwtToken(String token) {

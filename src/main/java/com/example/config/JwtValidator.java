@@ -1,6 +1,7 @@
 package com.example.config;
 
 import com.example.Entity.CustomUserDetails;
+import com.example.constant.CookieConstant;
 import com.example.constant.JwtConstant;
 import com.example.exception.CustomException;
 import com.example.service.implement.CustomUserServiceImpl;
@@ -22,6 +23,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 @Component
@@ -34,22 +37,40 @@ public class JwtValidator extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        String jwt = jwtProvider.getTokenFromCookie(request);
-        if(jwt != null  && jwtProvider.validateJwtToken(jwt)){
+
+        String tokenCookieAdmin = jwtProvider.getTokenFromCookie(request, CookieConstant.JWT_COOKIE_ADMIN);
+        String tokenCookieUser = jwtProvider.getTokenFromCookie(request, CookieConstant.JWT_COOKIE_USER);
+
+        List<GrantedAuthority> roles = new ArrayList<>();
+
+        roles.addAll(getRoleFormTokenCookie(tokenCookieAdmin));
+
+        roles.addAll(getRoleFormTokenCookie(tokenCookieUser));
+
+        Authentication authentication = new UsernamePasswordAuthenticationToken(null,null,roles);
+
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+
+        System.out.println(SecurityContextHolder.getContext().getAuthentication());
+
+        filterChain.doFilter(request,response);
+    }
+
+    public List<GrantedAuthority> getRoleFormTokenCookie(String token){
+        List<GrantedAuthority> roles = new ArrayList<>();
+        if(token != null  && jwtProvider.validateJwtToken(token)){
             try{
-                Claims claims = jwtProvider.getClaimsFormToken(jwt);
+                Claims claims = jwtProvider.getClaimsFormToken(token);
 
                 String email = String.valueOf(claims.get("email"));
 
                 CustomUserDetails user = (CustomUserDetails) customUserService.loadUserByUsername(email);
 
-                Authentication authentication = new UsernamePasswordAuthenticationToken(user,null,user.getAuthorities());
-
-                SecurityContextHolder.getContext().setAuthentication(authentication);
+                roles.addAll(user.getAuthorities());
             }catch (Exception e){
                 throw new BadCredentialsException("Invalid token....");
             }
         }
-        filterChain.doFilter(request,response);
+        return roles;
     }
 }

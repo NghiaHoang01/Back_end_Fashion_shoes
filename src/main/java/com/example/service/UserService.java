@@ -28,11 +28,19 @@ public interface UserService {
 
     String deleteUser(Long id) throws CustomException;
 
-    User updateInformation(UserRequest user) throws CustomException, IOException;
+    User updateInformation(UserRequest user, String token) throws CustomException, IOException;
+
+    User updateInformationUser(UserRequest userRequest) throws CustomException, IOException;
+
+    User updateInformationAdmin(UserRequest adminRequest) throws CustomException, IOException;
 
     Boolean confirmPassword(PasswordRequest passwordRequest) throws CustomException;
 
-    Response changePassword(PasswordRequest passwordRequest) throws CustomException;
+    Response changePassword(PasswordRequest passwordRequest, String token) throws CustomException;
+
+    Response changePasswordUser(PasswordRequest passwordRequest) throws CustomException;
+
+    Response changePasswordAdmin(PasswordRequest passwordRequest) throws CustomException;
 
     String sendOTPCode(String email) throws CustomException, MessagingException;
 

@@ -4,6 +4,7 @@ import com.example.Entity.Comment;
 import com.example.Entity.Product;
 import com.example.Entity.User;
 import com.example.config.JwtProvider;
+import com.example.constant.CookieConstant;
 import com.example.exception.CustomException;
 import com.example.repository.CommentRepository;
 import com.example.repository.ProductRepository;
@@ -40,7 +41,7 @@ public class CommentServiceImpl implements CommentService {
         Optional<Product> product = productRepository.findById(idProduct);
 
         if(product.isPresent()){
-            String token = jwtProvider.getTokenFromCookie(request);
+            String token = jwtProvider.getTokenFromCookie(request, CookieConstant.JWT_COOKIE_USER);
             User user = userService.findUserProfileByJwt(token);
 
             Comment comment = new Comment();
@@ -62,7 +63,7 @@ public class CommentServiceImpl implements CommentService {
         Optional<Comment> oldComment = commentRepository.findById(id);
 
         if(oldComment.isPresent()){
-            String token = jwtProvider.getTokenFromCookie(request);
+            String token = jwtProvider.getTokenFromCookie(request, CookieConstant.JWT_COOKIE_USER);
             User user = userService.findUserProfileByJwt(token);
 
             if(oldComment.get().getUserOfComment().getId().equals(user.getId())){
@@ -110,7 +111,7 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     public String deleteCommentByUser(Long id) throws CustomException {
-        String token = jwtProvider.getTokenFromCookie(request);
+        String token = jwtProvider.getTokenFromCookie(request, CookieConstant.JWT_COOKIE_USER);
         User user = userService.findUserProfileByJwt(token);
 
         Optional<Comment> comment = commentRepository.findById(id);

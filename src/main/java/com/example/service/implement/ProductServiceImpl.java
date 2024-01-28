@@ -2,6 +2,7 @@ package com.example.service.implement;
 
 import com.example.Entity.*;
 import com.example.config.JwtProvider;
+import com.example.constant.CookieConstant;
 import com.example.exception.CustomException;
 import com.example.repository.BrandRepository;
 import com.example.repository.ChildCategoryRepository;
@@ -53,7 +54,7 @@ public class ProductServiceImpl implements ProductService {
                 Optional<ChildCategory> checkChildCategory = childCategoryRepository.findByIdAndParentCategoryId(productRequest.getChildCategoryId(), productRequest.getParentCategoryId());
 
                 if (checkChildCategory.isPresent()) {
-                    String token = jwtProvider.getTokenFromCookie(request);
+                    String token = jwtProvider.getTokenFromCookie(request, CookieConstant.JWT_COOKIE_ADMIN);
                     User admin = userService.findUserProfileByJwt(token);
 
                     int quantity = 0;
@@ -106,7 +107,7 @@ public class ProductServiceImpl implements ProductService {
                     Optional<ChildCategory> checkChildCategory = childCategoryRepository.findByIdAndParentCategoryId(productRequest.getChildCategoryId(), productRequest.getParentCategoryId());
 
                     if (checkChildCategory.isPresent()) {
-                        String token = jwtProvider.getTokenFromCookie(request);
+                        String token = jwtProvider.getTokenFromCookie(request, CookieConstant.JWT_COOKIE_ADMIN);
                         User admin = userService.findUserProfileByJwt(token);
 
                         int quantity = 0;

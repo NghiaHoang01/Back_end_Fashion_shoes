@@ -4,6 +4,7 @@ import com.example.Entity.Brand;
 import com.example.Entity.ParentCategory;
 import com.example.Entity.User;
 import com.example.config.JwtProvider;
+import com.example.constant.CookieConstant;
 import com.example.exception.CustomException;
 import com.example.repository.BrandRepository;
 import com.example.repository.ParentCategoryRepository;
@@ -44,7 +45,7 @@ public class ParentCategoryServiceImpl implements ParentCategoryService {
             ParentCategory check = parentCategoryRepository.findByNameAndBrandId(parentCategoryRequest.getName(), brand.get().getId());
 
             if (check == null) {
-                String token = jwtProvider.getTokenFromCookie(request);
+                String token = jwtProvider.getTokenFromCookie(request, CookieConstant.JWT_COOKIE_ADMIN);
                 User admin = userService.findUserProfileByJwt(token);
 
                 ParentCategory parentCategory = new ParentCategory();
@@ -74,7 +75,7 @@ public class ParentCategoryServiceImpl implements ParentCategoryService {
             ParentCategory check = parentCategoryRepository.findByNameAndBrandId(parentCategoryRequest.getName(), oldParentCategory.get().getBrand().getId());
 
             if (check == null || check.getName().equals(oldParentCategory.get().getName())) {
-                String token = jwtProvider.getTokenFromCookie(request);
+                String token = jwtProvider.getTokenFromCookie(request, CookieConstant.JWT_COOKIE_ADMIN);
                 User admin = userService.findUserProfileByJwt(token);
 
                 oldParentCategory.get().setUpdateBy(admin.getEmail());

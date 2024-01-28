@@ -3,6 +3,7 @@ package com.example.service.implement;
 import com.example.Entity.Role;
 import com.example.Entity.User;
 import com.example.config.JwtProvider;
+import com.example.constant.CookieConstant;
 import com.example.constant.RoleConstant;
 import com.example.exception.CustomException;
 import com.example.repository.UserRepository;
@@ -108,7 +109,7 @@ public class UserServiceImpl implements UserService {
         } else {
             User admin = new User();
 
-            String token = jwtProvider.getTokenFromCookie(request);
+            String token = jwtProvider.getTokenFromCookie(request, CookieConstant.JWT_COOKIE_ADMIN);
 
             String email = (String) jwtProvider.getClaimsFormToken(token).get("email");
             String createdBy = findUserByEmail(email).getEmail();
@@ -152,10 +153,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @Transactional
-    public User updateInformation(UserRequest userRequest) throws CustomException, IOException {
-        String token = jwtProvider.getTokenFromCookie(request);
-
+    public User updateInformation(UserRequest userRequest, String token) throws CustomException, IOException {
         User oldUser = findUserProfileByJwt(token);
 
         oldUser.setAvatarBase64(userRequest.getAvatarBase64());
@@ -173,8 +171,24 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
+    public User updateInformationUser(UserRequest userRequest) throws CustomException, IOException {
+        String token = jwtProvider.getTokenFromCookie(request, CookieConstant.JWT_COOKIE_USER);
+
+        return updateInformation(userRequest, token);
+    }
+
+    @Override
+    @Transactional
+    public User updateInformationAdmin(UserRequest adminRequest) throws CustomException, IOException {
+        String token = jwtProvider.getTokenFromCookie(request, CookieConstant.JWT_COOKIE_ADMIN);
+
+        return updateInformation(adminRequest, token);
+    }
+
+    @Override
     public Boolean confirmPassword(PasswordRequest password) throws CustomException {
-        String token = jwtProvider.getTokenFromCookie(request);
+        String token = jwtProvider.getTokenFromCookie(request, CookieConstant.JWT_COOKIE_USER);
 
         User user = findUserProfileByJwt(token);
 
@@ -182,10 +196,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @Transactional
-    public Response changePassword(PasswordRequest passwordRequest) throws CustomException {
-        String token = jwtProvider.getTokenFromCookie(request);
-
+    public Response changePassword(PasswordRequest passwordRequest, String token) throws CustomException {
         User user = findUserProfileByJwt(token);
 
         Response response = new Response();
@@ -202,6 +213,22 @@ public class UserServiceImpl implements UserService {
         } else {
             throw new CustomException("Old password does not match !!!");
         }
+    }
+
+    @Override
+    @Transactional
+    public Response changePasswordUser(PasswordRequest passwordRequest) throws CustomException {
+        String token = jwtProvider.getTokenFromCookie(request, CookieConstant.JWT_COOKIE_USER);
+
+       return changePassword(passwordRequest, token);
+    }
+
+    @Override
+    @Transactional
+    public Response changePasswordAdmin(PasswordRequest passwordRequest) throws CustomException {
+        String token = jwtProvider.getTokenFromCookie(request, CookieConstant.JWT_COOKIE_ADMIN);
+
+        return changePassword(passwordRequest, token);
     }
 
     @Override

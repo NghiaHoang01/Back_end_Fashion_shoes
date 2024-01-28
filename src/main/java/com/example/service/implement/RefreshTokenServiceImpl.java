@@ -35,7 +35,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
             RefreshToken refreshToken = new RefreshToken();
             refreshToken.setUser(user.get());
             refreshToken.setExpiryDate(LocalDateTime.now().plusDays(10));
-            refreshToken.setRefreshTokenCode(UUID.randomUUID().toString());
+            refreshToken.setRefreshTokenCode(UUID.randomUUID().toString() + "-" + user.get().getId());
 
             return refreshTokenRepository.save(refreshToken);
         }else {
@@ -54,8 +54,8 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
 
     @Override
     @Transactional
-    public String deleteRefreshTokenByUserId(Long userId) throws CustomException {
-        Optional<RefreshToken> delete = refreshTokenRepository.deleteByUser(userRepository.findById(userId).get());
+    public String deleteRefreshTokenByRefreshTokenCode(String refreshTokenCode) throws CustomException {
+        Optional<RefreshToken> delete = refreshTokenRepository.deleteByRefreshTokenCode(refreshTokenCode);
         if(delete.isPresent()){
             return "Delete refresh token success !!!!";
         }else{

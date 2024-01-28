@@ -5,6 +5,7 @@ import com.example.Entity.Product;
 import com.example.Entity.Size;
 import com.example.Entity.User;
 import com.example.config.JwtProvider;
+import com.example.constant.CookieConstant;
 import com.example.exception.CustomException;
 import com.example.repository.CartRepository;
 import com.example.repository.ProductRepository;
@@ -42,7 +43,7 @@ public class CartServiceImpl implements CartService {
     @Override
     @Transactional
     public CartItemResponse addToCart(CartRequest cartRequest) throws CustomException {
-        String token = jwtProvider.getTokenFromCookie(request);
+        String token = jwtProvider.getTokenFromCookie(request, CookieConstant.JWT_COOKIE_USER);
         User user = userService.findUserProfileByJwt(token);
 
         Cart cart = new Cart();
@@ -114,7 +115,7 @@ public class CartServiceImpl implements CartService {
         Cart cart = new Cart();
 
         if (oldCartItem.isPresent()) {
-            String token = jwtProvider.getTokenFromCookie(request);
+            String token = jwtProvider.getTokenFromCookie(request, CookieConstant.JWT_COOKIE_USER);
             User user = userService.findUserProfileByJwt(token);
 
             if (user.getId().equals(oldCartItem.get().getUser().getId())) {
@@ -183,7 +184,7 @@ public class CartServiceImpl implements CartService {
         Optional<Cart> cart = cartRepository.findById(id);
 
         if (cart.isPresent()) {
-            String token = jwtProvider.getTokenFromCookie(request);
+            String token = jwtProvider.getTokenFromCookie(request, CookieConstant.JWT_COOKIE_USER);
             User user = userService.findUserProfileByJwt(token);
 
             if (user.getId().equals(cart.get().getUser().getId())) {
@@ -199,7 +200,7 @@ public class CartServiceImpl implements CartService {
 
     @Override
     public String deleteMultiCartItem(List<Long> idProducts) throws CustomException {
-        String token = jwtProvider.getTokenFromCookie(request);
+        String token = jwtProvider.getTokenFromCookie(request, CookieConstant.JWT_COOKIE_USER);
         User user = userService.findUserProfileByJwt(token);
 
         idProducts.forEach(id -> {
@@ -227,7 +228,7 @@ public class CartServiceImpl implements CartService {
 
     @Override
     public CartResponse getCartDetails() throws CustomException {
-        String token = jwtProvider.getTokenFromCookie(request);
+        String token = jwtProvider.getTokenFromCookie(request, CookieConstant.JWT_COOKIE_USER);
         User user = userService.findUserProfileByJwt(token);
 
         List<Cart> carts = cartRepository.findByUserIdOrderByIdDesc(user.getId());
@@ -259,7 +260,7 @@ public class CartServiceImpl implements CartService {
 
     @Override
     public int countCartItem() throws CustomException {
-        String token = jwtProvider.getTokenFromCookie(request);
+        String token = jwtProvider.getTokenFromCookie(request, CookieConstant.JWT_COOKIE_USER);
         User user = userService.findUserProfileByJwt(token);
 
         return cartRepository.countByUserId(user.getId());

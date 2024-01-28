@@ -3,6 +3,7 @@ package com.example.service.implement;
 import com.example.Entity.Role;
 import com.example.Entity.User;
 import com.example.config.JwtProvider;
+import com.example.constant.CookieConstant;
 import com.example.constant.RoleConstant;
 import com.example.exception.CustomException;
 import com.example.repository.RoleRepository;
@@ -44,14 +45,14 @@ public class RoleServiceImpl implements RoleService {
         if(check != null){
             throw new CustomException("Role is already exist with name: " + roleRequest.getName());
         }else{
-            String token = jwtProvider.getTokenFromCookie(request);
-            User user = userService.findUserProfileByJwt(token);
+            String token = jwtProvider.getTokenFromCookie(request, CookieConstant.JWT_COOKIE_ADMIN);
+            User admin = userService.findUserProfileByJwt(token);
 
             Role role = new Role();
 
             role.setName(roleRequest.getName());
             role.setDescription(roleRequest.getDescription());
-            role.setCreatedBy(user.getEmail());
+            role.setCreatedBy(admin.getEmail());
 
             return roleRepository.save(role);
         }
@@ -84,12 +85,12 @@ public class RoleServiceImpl implements RoleService {
 
         if (oldRole.isPresent()) {
             if (check == null || check.getName().equals(oldRole.get().getName())){
-                String token = jwtProvider.getTokenFromCookie(request);
-                User user = userService.findUserProfileByJwt(token);
+                String token = jwtProvider.getTokenFromCookie(request, CookieConstant.JWT_COOKIE_ADMIN);
+                User admin = userService.findUserProfileByJwt(token);
 
                 oldRole.get().setName(roleRequest.getName());
                 oldRole.get().setDescription(roleRequest.getDescription());
-                oldRole.get().setUpdateBy(user.getEmail());
+                oldRole.get().setUpdateBy(admin.getEmail());
 
                 return roleRepository.save(oldRole.get());
             }else{

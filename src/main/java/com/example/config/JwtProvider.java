@@ -32,10 +32,10 @@ public class JwtProvider {
                 .signWith(key(), SignatureAlgorithm.HS256).compact();
     }
 
-    public ResponseCookie generateTokenCookie(User user) {
+    public ResponseCookie generateTokenCookie(String name, User user) {
         String token = generateToken(user);
 
-        return ResponseCookie.from(CookieConstant.JWT_COOKIE, token)
+        return ResponseCookie.from(name, token)
                 .domain(".railway.app")
                 .path("/")
                 .maxAge(10*60)
@@ -45,8 +45,8 @@ public class JwtProvider {
                 .build();
     }
 
-    public ResponseCookie generateRefreshTokenCodeCookie(String refreshTokenCode) {
-        return ResponseCookie.from(CookieConstant.JWT_REFRESH_CODE_COOKIE, refreshTokenCode)
+    public ResponseCookie generateRefreshTokenCodeCookie(String name, String refreshTokenCode) {
+        return ResponseCookie.from(name, refreshTokenCode)
                 .domain(".railway.app")
                 .path("/")
                 .maxAge(24 * 60 * 60 * 10)
@@ -56,8 +56,8 @@ public class JwtProvider {
                 .build();
     }
 
-    public String getTokenFromCookie(HttpServletRequest request) {
-        Cookie tokenCookie = WebUtils.getCookie(request, CookieConstant.JWT_COOKIE);
+    public String getTokenFromCookie(HttpServletRequest request, String name) {
+        Cookie tokenCookie = WebUtils.getCookie(request, name);
 
         if (tokenCookie != null) {
             return tokenCookie.getValue();
@@ -66,8 +66,8 @@ public class JwtProvider {
         }
     }
 
-    public String getRefreshTokenCodeFromCookie(HttpServletRequest request) {
-        Cookie refreshToken = WebUtils.getCookie(request, CookieConstant.JWT_REFRESH_CODE_COOKIE);
+    public String getRefreshTokenCodeFromCookie(HttpServletRequest request, String name) {
+        Cookie refreshToken = WebUtils.getCookie(request, name);
         if (refreshToken != null) {
             return refreshToken.getValue();
         } else {
@@ -75,12 +75,12 @@ public class JwtProvider {
         }
     }
 
-    public ResponseCookie cleanTokenCookie() {
-        return ResponseCookie.from(CookieConstant.JWT_COOKIE, "").path("/").maxAge(0).build();
+    public ResponseCookie cleanTokenCookie(String name) {
+        return ResponseCookie.from(name, "").path("/").maxAge(0).build();
     }
 
-    public ResponseCookie cleanRefreshTokenCodeCookie(){
-        return ResponseCookie.from(CookieConstant.JWT_REFRESH_CODE_COOKIE, "").path("/").maxAge(0).build();
+    public ResponseCookie cleanRefreshTokenCodeCookie(String name){
+        return ResponseCookie.from(name, "").path("/").maxAge(0).build();
     }
 
     public boolean validateJwtToken(String token) {

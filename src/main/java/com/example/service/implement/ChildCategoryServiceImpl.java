@@ -5,6 +5,7 @@ import com.example.Entity.ChildCategory;
 import com.example.Entity.ParentCategory;
 import com.example.Entity.User;
 import com.example.config.JwtProvider;
+import com.example.constant.CookieConstant;
 import com.example.exception.CustomException;
 import com.example.repository.BrandRepository;
 import com.example.repository.ChildCategoryRepository;
@@ -47,7 +48,7 @@ public class ChildCategoryServiceImpl implements ChildCategoryService {
                 ChildCategory check = childCategoryRepository.findByNameAndParentCategoryId(childCategoryRequest.getName(),parentCategory.get().getId());
 
                 if(check == null){
-                    String token = jwtProvider.getTokenFromCookie(request);
+                    String token = jwtProvider.getTokenFromCookie(request, CookieConstant.JWT_COOKIE_ADMIN);
                     User admin = userService.findUserProfileByJwt(token);
 
                     ChildCategory childCategory = new ChildCategory();
@@ -75,7 +76,7 @@ public class ChildCategoryServiceImpl implements ChildCategoryService {
             ChildCategory check = childCategoryRepository.findByNameAndParentCategoryId(childCategoryRequest.getName(),oldChildCategory.get().getParentCategory().getId());
 
             if(check == null || check.getName().equals(oldChildCategory.get().getName())){
-                String token = jwtProvider.getTokenFromCookie(request);
+                String token = jwtProvider.getTokenFromCookie(request, CookieConstant.JWT_COOKIE_ADMIN);
                 User admin = userService.findUserProfileByJwt(token);
 
                 oldChildCategory.get().setName(childCategoryRequest.getName());

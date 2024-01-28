@@ -14,7 +14,7 @@ public interface RefreshTokenService {
 
     RefreshToken verifyExpiration(RefreshToken refreshToken) throws CustomException;
 
-    String deleteRefreshTokenByUserId(Long userId) throws CustomException;
+    String deleteRefreshTokenByRefreshTokenCode(String refreshTokenCode) throws CustomException;
 
     void deleteAllExpiredSince(LocalDateTime now);
 }

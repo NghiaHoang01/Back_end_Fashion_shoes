@@ -3,6 +3,7 @@ package com.example.service.implement;
 import com.example.Entity.Brand;
 import com.example.Entity.User;
 import com.example.config.JwtProvider;
+import com.example.constant.CookieConstant;
 import com.example.exception.CustomException;
 import com.example.repository.BrandRepository;
 import com.example.request.BrandRequest;
@@ -81,7 +82,7 @@ public class BrandServiceImpl implements BrandService {
         Brand check = brandRepository.findByName(brandRequest.getName());
 
         if (check == null) {
-            String token = jwtProvider.getTokenFromCookie(request);
+            String token = jwtProvider.getTokenFromCookie(request, CookieConstant.JWT_COOKIE_ADMIN);
             User admin = userService.findUserProfileByJwt(token);
 
             Brand brand = new Brand();
@@ -104,7 +105,7 @@ public class BrandServiceImpl implements BrandService {
 
         if (oldBrand.isPresent()) {
             if (check == null || check.getName().equals(oldBrand.get().getName())) {
-                String token = jwtProvider.getTokenFromCookie(request);
+                String token = jwtProvider.getTokenFromCookie(request, CookieConstant.JWT_COOKIE_ADMIN);
                 User admin = userService.findUserProfileByJwt(token);
 
                 oldBrand.get().setUpdateBy(admin.getEmail());

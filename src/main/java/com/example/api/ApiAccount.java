@@ -3,6 +3,7 @@ package com.example.api;
 import com.example.Entity.CustomUserDetails;
 import com.example.Entity.RefreshToken;
 import com.example.config.JwtProvider;
+import com.example.constant.CookieConstant;
 import com.example.constant.RoleConstant;
 import com.example.exception.CustomException;
 import com.example.request.*;
@@ -72,11 +73,11 @@ public class ApiAccount {
 
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
 
-        ResponseCookie token = jwtProvider.generateTokenCookie(userDetails.getUser());
+        ResponseCookie token = jwtProvider.generateTokenCookie(CookieConstant.JWT_COOKIE_USER,userDetails.getUser());
 
         RefreshToken refreshToken = refreshTokenService.createRefreshToken(userDetails.getUser().getId());
 
-        ResponseCookie refreshTokenCodeCookie = jwtProvider.generateRefreshTokenCodeCookie(refreshToken.getRefreshTokenCode());
+        ResponseCookie refreshTokenCodeCookie = jwtProvider.generateRefreshTokenCodeCookie(CookieConstant.JWT_REFRESH_TOKEN_CODE_COOKIE_USER,refreshToken.getRefreshTokenCode());
 
         UserResponse userInformation = new UserResponse();
         userInformation.setId(userDetails.getUser().getId());
@@ -125,11 +126,11 @@ public class ApiAccount {
 
             CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
 
-            ResponseCookie token = jwtProvider.generateTokenCookie(userDetails.getUser());
+            ResponseCookie token = jwtProvider.generateTokenCookie(CookieConstant.JWT_COOKIE_ADMIN,userDetails.getUser());
 
             RefreshToken refreshToken = refreshTokenService.createRefreshToken(userDetails.getUser().getId());
 
-            ResponseCookie refreshTokenCode = jwtProvider.generateRefreshTokenCodeCookie(refreshToken.getRefreshTokenCode());
+            ResponseCookie refreshTokenCode = jwtProvider.generateRefreshTokenCodeCookie(CookieConstant.JWT_REFRESH_TOKEN_CODE_COOKIE_ADMIN,refreshToken.getRefreshTokenCode());
 
             UserResponse userInformation = new UserResponse();
 
@@ -165,9 +166,9 @@ public class ApiAccount {
     }
 
     // CALL SUCCESS
-    @PostMapping("/refresh/token")
-    public ResponseEntity<?> refreshToken(HttpServletRequest request) throws CustomException {
-        String refreshTokenCodeCookie = jwtProvider.getRefreshTokenCodeFromCookie(request);
+    @PostMapping("/refresh/token/user")
+    public ResponseEntity<?> refreshTokenUser(HttpServletRequest request) throws CustomException {
+        String refreshTokenCodeCookie = jwtProvider.getRefreshTokenCodeFromCookie(request, CookieConstant.JWT_REFRESH_TOKEN_CODE_COOKIE_USER);
 
         if ((refreshTokenCodeCookie != null) && (refreshTokenCodeCookie.length() > 0)) {
 
@@ -177,7 +178,45 @@ public class ApiAccount {
                 RefreshToken refreshTokenCheck = refreshTokenService.verifyExpiration(refreshToken.get());
 
                 if (refreshTokenCheck != null) {
-                    ResponseCookie tokenCookie = jwtProvider.generateTokenCookie(refreshTokenCheck.getUser());
+                    ResponseCookie tokenCookie = jwtProvider.generateTokenCookie(CookieConstant.JWT_COOKIE_USER,refreshTokenCheck.getUser());
+
+                    Response response = new Response();
+                    response.setMessage("Token is refreshed successfully !!!");
+                    response.setSuccess(true);
+
+                    return ResponseEntity.ok()
+                            .header(HttpHeaders.SET_COOKIE, tokenCookie.toString())
+                            .body(response);
+                }
+            } else {
+                throw new CustomException("Refresh token is not in database !!!");
+            }
+        }
+
+        // xoa nhung token da het han
+        refreshTokenService.deleteAllExpiredSince(LocalDateTime.now());
+
+        Response response = new Response();
+        response.setSuccess(false);
+        response.setMessage("Refresh Token is empty !!!");
+
+        return ResponseEntity.badRequest().body(response);
+    }
+
+    // CALL SUCCESS
+    @PostMapping("/refresh/token/admin")
+    public ResponseEntity<?> refreshTokenAdmin(HttpServletRequest request) throws CustomException {
+        String refreshTokenCodeCookie = jwtProvider.getRefreshTokenCodeFromCookie(request, CookieConstant.JWT_REFRESH_TOKEN_CODE_COOKIE_ADMIN);
+
+        if ((refreshTokenCodeCookie != null) && (refreshTokenCodeCookie.length() > 0)) {
+
+            Optional<RefreshToken> refreshToken = refreshTokenService.findByRefreshTokenCode(refreshTokenCodeCookie);
+
+            if (refreshToken.isPresent()) {
+                RefreshToken refreshTokenCheck = refreshTokenService.verifyExpiration(refreshToken.get());
+
+                if (refreshTokenCheck != null) {
+                    ResponseCookie tokenCookie = jwtProvider.generateTokenCookie(CookieConstant.JWT_COOKIE_ADMIN,refreshTokenCheck.getUser());
 
                     Response response = new Response();
                     response.setMessage("Token is refreshed successfully !!!");

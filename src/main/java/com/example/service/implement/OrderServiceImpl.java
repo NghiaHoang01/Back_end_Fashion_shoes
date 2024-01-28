@@ -3,6 +3,7 @@ package com.example.service.implement;
 import com.example.Entity.*;
 import com.example.config.JwtProvider;
 import com.example.config.VNPayConfig;
+import com.example.constant.CookieConstant;
 import com.example.constant.OrderConstant;
 import com.example.exception.CustomException;
 import com.example.repository.*;
@@ -56,7 +57,7 @@ public class OrderServiceImpl implements OrderService {
         // do mua hàng thông qua cart nên phải check xem các sản phẩm request có đang nằm trong giỏ hàng của user không !!!
         // sau khi đặt hàng thành công thì sẽ xóa các sản phẩm đã đặt ở trong giỏ hàng của user
 
-        String token = jwtProvider.getTokenFromCookie(request);
+        String token = jwtProvider.getTokenFromCookie(request, CookieConstant.JWT_COOKIE_USER);
         User user = userService.findUserProfileByJwt(token);
 
         List<OrderProductQuantityRequest> orderProductQuantityRequests = orderRequest.getProductQuantities();
@@ -261,7 +262,7 @@ public class OrderServiceImpl implements OrderService {
                                                      LocalDateTime orderDateStart, LocalDateTime orderDateEnd,
                                                      LocalDateTime deliveryDateStart, LocalDateTime deliveryDateEnd,
                                                      LocalDateTime receivingDateStart, LocalDateTime receivingDateEnd) throws CustomException {
-        String token = jwtProvider.getTokenFromCookie(request);
+        String token = jwtProvider.getTokenFromCookie(request, CookieConstant.JWT_COOKIE_USER);
         User user = userService.findUserProfileByJwt(token);
 
         List<Order> ordersOfUser = orderRepository.getOrdersByUser(user.getId(), orderStatus, paymentMethod,
@@ -298,7 +299,7 @@ public class OrderServiceImpl implements OrderService {
     public OrderResponse getOrderDetail(Long orderId) throws CustomException {
         Optional<Order> order = orderRepository.findById(orderId);
         if (order.isPresent()) {
-            String token = jwtProvider.getTokenFromCookie(request);
+            String token = jwtProvider.getTokenFromCookie(request, CookieConstant.JWT_COOKIE_USER);
             User user = userService.findUserProfileByJwt(token);
             if (user.getId().equals(order.get().getUser().getId())) {
 
@@ -327,7 +328,7 @@ public class OrderServiceImpl implements OrderService {
     @Override
     @Transactional
     public void cancelOrderByUser(Long idOrder) throws CustomException {
-        String token = jwtProvider.getTokenFromCookie(request);
+        String token = jwtProvider.getTokenFromCookie(request, CookieConstant.JWT_COOKIE_USER);
         User user = userService.findUserProfileByJwt(token);
 
         Optional<Order> order = orderRepository.findById(idOrder);
@@ -338,8 +339,9 @@ public class OrderServiceImpl implements OrderService {
                 if (Objects.equals(user.getId(), order.get().getUser().getId())) {
                     if (order.get().getPaymentMethod().equals("VNPAY")) {
                         VNPayInformation vnPayInformation = vnPayRepository.findByOrderId(order.get().getId());
-
-                        vnPayRepository.delete(vnPayInformation);
+                        if(vnPayInformation != null){
+                            vnPayRepository.delete(vnPayInformation);
+                        }
                     }
                     orderRepository.delete(order.get());
                 } else {
@@ -360,7 +362,7 @@ public class OrderServiceImpl implements OrderService {
         Optional<Order> order = orderRepository.findById(id);
 
         if (order.isPresent()) {
-            String token = jwtProvider.getTokenFromCookie(request);
+            String token = jwtProvider.getTokenFromCookie(request, CookieConstant.JWT_COOKIE_ADMIN);
             User admin = userService.findUserProfileByJwt(token);
 
             // cập nhật lại số lượng còn trong kho
@@ -425,7 +427,7 @@ public class OrderServiceImpl implements OrderService {
         Optional<Order> order = orderRepository.findById(id);
 
         if (order.isPresent()) {
-            String token = jwtProvider.getTokenFromCookie(request);
+            String token = jwtProvider.getTokenFromCookie(request, CookieConstant.JWT_COOKIE_ADMIN);
             User admin = userService.findUserProfileByJwt(token);
 
             order.get().setStatus(OrderConstant.ORDER_SHIPPED);
@@ -444,7 +446,7 @@ public class OrderServiceImpl implements OrderService {
         Optional<Order> order = orderRepository.findById(id);
 
         if (order.isPresent()) {
-            String token = jwtProvider.getTokenFromCookie(request);
+            String token = jwtProvider.getTokenFromCookie(request, CookieConstant.JWT_COOKIE_ADMIN);
             User admin = userService.findUserProfileByJwt(token);
 
             order.get().setPay(OrderConstant.ORDER_PAID);
@@ -507,7 +509,7 @@ public class OrderServiceImpl implements OrderService {
     public void updateOrderByUser(Long orderId, OrderUpdateRequest orderUpdateRequest) throws CustomException {
         Optional<Order> orderUpdate = orderRepository.findById(orderId);
         if (orderUpdate.isPresent()) {
-            String token = jwtProvider.getTokenFromCookie(request);
+            String token = jwtProvider.getTokenFromCookie(request, CookieConstant.JWT_COOKIE_USER);
             User user = userService.findUserProfileByJwt(token);
             if (orderUpdate.get().getUser().getId().equals(user.getId())) {
                 orderUpdate.get().setFullName(orderUpdateRequest.getFullName());

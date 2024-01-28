@@ -80,6 +80,9 @@ public class JwtProvider {
                 .domain(".railway.app")
                 .path("/")
                 .maxAge(0)
+                .httpOnly(true)
+                .secure(true)
+                .sameSite("None")
                 .build();
     }
 
@@ -88,6 +91,9 @@ public class JwtProvider {
                 .domain(".railway.app")
                 .path("/")
                 .maxAge(0)
+                .httpOnly(true)
+                .secure(true)
+                .sameSite("None")
                 .build();
     }
 

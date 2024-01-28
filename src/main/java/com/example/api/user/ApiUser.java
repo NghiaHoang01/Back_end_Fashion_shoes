@@ -1,8 +1,9 @@
 package com.example.api.user;
 
-import com.example.Entity.CustomUserDetails;
 import com.example.Entity.User;
 import com.example.config.JwtProvider;
+import com.example.constant.CookieConstant;
+import com.example.constant.RoleConstant;
 import com.example.exception.CustomException;
 import com.example.request.PasswordRequest;
 import com.example.request.UserRequest;
@@ -13,13 +14,19 @@ import com.example.service.RefreshTokenService;
 import com.example.service.implement.UserServiceImpl;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.*;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.Objects;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController("user")
 @RequestMapping("/api/user")
@@ -37,7 +44,7 @@ public class ApiUser {
     // CALL SUCCESS
     @PutMapping(value = "/update/profile")
     public ResponseEntity<?> updateInformation(@RequestBody UserRequest newUser) throws CustomException, IOException {
-        User user = userService.updateInformation(newUser);
+        User user = userService.updateInformationUser(newUser);
 
         UserResponse userInformation = new UserResponse();
 
@@ -65,31 +72,28 @@ public class ApiUser {
     // CALL SUCCESS
     @PostMapping("/logout")
     public ResponseEntity<?> userLogout() throws CustomException {
-        CustomUserDetails userDetails = (CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        if (userDetails != null) {
-            if (!Objects.equals(userDetails.toString(), "anonymous")) {
-                refreshTokenService.deleteRefreshTokenByUserId(userDetails.getUser().getId());
-            }
-            ResponseCookie cookie = jwtProvider.cleanTokenCookie();
-            ResponseCookie refreshTokenCookie = jwtProvider.cleanRefreshTokenCodeCookie();
+        // delete refresh token in database
+        String refreshTokenCode = jwtProvider.getRefreshTokenCodeFromCookie(request, CookieConstant.JWT_REFRESH_TOKEN_CODE_COOKIE_USER);
+        refreshTokenService.deleteRefreshTokenByRefreshTokenCode(refreshTokenCode);
 
-            Response response = new Response();
-            response.setMessage("Logout success !!!");
-            response.setSuccess(true);
+        // delete token and refresh token on cookie
+        ResponseCookie cookie = jwtProvider.cleanTokenCookie(CookieConstant.JWT_COOKIE_USER);
+        ResponseCookie refreshTokenCookie = jwtProvider.cleanRefreshTokenCodeCookie(CookieConstant.JWT_REFRESH_TOKEN_CODE_COOKIE_USER);
 
-            return ResponseEntity.ok()
-                    .header(HttpHeaders.SET_COOKIE, cookie.toString())
-                    .header(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString())
-                    .body(response);
-        } else {
-            throw new CustomException("Error system");
-        }
+        Response response = new Response();
+        response.setMessage("Logout success !!!");
+        response.setSuccess(true);
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, cookie.toString())
+                .header(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString())
+                .body(response);
     }
 
     // CALL SUCCESS
     @PutMapping("/password")
     public ResponseEntity<?> changePassword(@RequestBody PasswordRequest passwordRequest) throws CustomException {
-        Response response = userService.changePassword(passwordRequest);
+        Response response = userService.changePasswordUser(passwordRequest);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
@@ -104,7 +108,7 @@ public class ApiUser {
 
     @GetMapping("/information")
     public ResponseEntity<?> getInformation() throws CustomException {
-        String token = jwtProvider.getTokenFromCookie(request);
+        String token = jwtProvider.getTokenFromCookie(request, CookieConstant.JWT_COOKIE_USER);
 
         User user = userService.findUserProfileByJwt(token);
         return new ResponseEntity<>(user, HttpStatus.OK);
